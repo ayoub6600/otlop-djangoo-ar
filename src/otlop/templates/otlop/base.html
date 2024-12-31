@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="ar">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        {% if title %}
+        <title>أطلب | {{ title }}</title>
+        {% else %}  
+        <title>أطلب</title>
+        {% endif %}
+        <link rel="stylesheet" href="{% static 'otlop/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'otlop/css/main.css' %}">
+        <link rel="shortcut icon" href="{% static 'otlop/images/otlopp.ico' %}">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.2/css/bootstrap.min.css">
+        <script src="{% static 'otlop/js/jquery-3.3.1.slim.min.js' %}"></script>
+        <script src="{% static 'otlop/js/popper.min.js' %}"></script>
+        <script src="{% static 'otlop/js/bootstrap.bundle.min.js' %}"></script>
+        <link rel="stylesheet" href="main.css"> <!-- ربط ملف CSS -->
+
+        
+     </head>
+    <body>
+      
+      </body>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+      <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha384-ZvpUoO/+P9yZm92jIo+0myAFIXCtAWi9N5/2tGbQb8/HOImaI4XwNI0CJDuwvK4" crossorigin="anonymous"></script>
+
+<!-- Popper.js (لازم لـ Bootstrap) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S9n9mQp/SFN9OAZqT6aPihUibBJi4ZODfJTFeH2KJKoTPp" crossorigin="anonymous"></script>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4Agx8Jk9WXbDr4R9EJOIbk3UJ36WO0Jp3FoIBh3xviAqBzUg6qyo" crossorigin="anonymous"></script>
+
+        <header>
+            <!-- start navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="#"> 
+                  <img src="{% static 'otlop/images/icoogo.ico' %}" alt="شعار أطلب" width="65px">
+                   OTLOP - أطلب </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                  <ul class="navbar-nav ">
+                    <li class="nav-item active">
+                      <a class="nav-link" href="{% url 'home' %}">الرئيسية <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        طلباتي
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="ordersDropdown">
+                        <a class="dropdown-item" href="/new-order">طلب جديد الآن</a>
+                        <a class="dropdown-item" href="/previous-orders">طلبات سابقة</a>
+                        <a class="dropdown-item" href="/dashboard">لوحةالتحكم</a>
+                        <a class="dropdown-item" href="{% url 'drivers_list' %}">إدارة السائقين</a>
+                        <a class="dropdown-item" href="{% url 'driver_accounts' %}">حسابات السائقين</a>                        
+                        <a class="dropdown-item" href="{% url 'record_payment' driver_id=1 %}">إضافة دفعة</a>
+                      </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="contactDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        التواصل
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="contactDropdown">
+                        <a class="dropdown-item" href="https://wa.me/218931331622" target="_blank">واتساب</a>
+                        <a class="dropdown-item" href="https://www.facebook.com/share/1G3By1fnqo/?mibextid=wwXIfr" target="_blank">فيسبوك</a>
+                        <a class="dropdown-item" href="https://www.instagram.com/otlop.delivery?igsh=MXF1MTltcDYybHZxdQ==" target="_blank">انستغرام</a>
+                      </div>
+                    </li>
+                  </ul>
+                  
+                  <!-- روابط تسجيل الدخول والتسجيل -->
+                    <ul class="navbar-nav mr-auto">
+                      <li class="nav-item">
+                          <a class="nav-link login" href="/login">تسجيل الدخول</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link register" href="/register">تسجيل</a>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
+            <!-- end navbar -->
+        </header>
+        {% if messages %}
+             <div class="messages">
+        {% for message in messages %}
+             <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+             </div>
+        {% endfor %}
+              </div>
+          {% endif %}
+        {% block content %}
+        <section class="intro-section">
+          <div class="container">
+              <h2 class="section-title">مرحبًا بك في شركة أطلب</h2>
+              <p class="section-subtitle">نقدم خدمات توصيل سريعة وفعالة لتلبية احتياجاتك اليومية.</p>
+              <div class="features">
+                  <div class="feature-box">
+                      <i class="fas fa-truck fa-3x"></i>
+                      <h3>توصيل سريع</h3>
+                      <p>نضمن توصيل طلباتك في أسرع وقت وبأفضل جودة.</p>
+                  </div>
+                  <div class="feature-box">
+                      <i class="fas fa-phone fa-3x"></i>
+                      <h3>خدمة عملاء</h3>
+                      <p>نحن هنا لخدمتك على مدار الساعة عبر الهاتف أو التطبيق.</p>
+                  </div>
+                  <div class="feature-box">
+                      <i class="fas fa-map-marker-alt fa-3x"></i>
+                      <h3>تغطية واسعة</h3>
+                      <p>نغطي معظم المناطق لتوفير الراحة لجميع عملائنا.</p>
+                  </div>
+              </div>
+          </div>
+      </section>
+      
+         {% endblock %}
+         <body>
+          <header>
+              <!-- الهيدر هنا -->
+          </header>
+      
+          <main>
+              <!-- المحتوى الرئيسي هنا -->
+          </main>
+      
+          <footer>
+              <p>&copy; 2024 شركة أطلب - جميع الحقوق محفوظة.</p>
+              <div class="footer-links">
+                  <a href="#">سياسة الخصوصية</a> |
+                  <a href="#">شروط الاستخدام</a> |
+                  <a href="#">تواصل معنا</a>
+              </div>
+          </footer>
+      </body>
+        
+
+        <!-- JavaScript Files -->
+        <script src="{% static 'otlop/js/jquery-3.3.1.min.js' %}"></script>
+        <script src="{% static 'otlop/js/popper.min.js' %}"></script>
+        <script src="{% static 'otlop/js/bootstrap.bundle.min.js' %}"></script> <!-- استخدم هذا بدلاً من bootstrap.min.js -->
+        <script src="{% static 'otlop/js/fontawesome-all.min.js' %}"></script>
+        <script>
+            $(document).ready(function() {
+              console.log('jQuery و Bootstrap يعملان!');
+            });
+          </script>
+    </body>
+</html>

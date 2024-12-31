@@ -1,0 +1,535 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* ضمان أن الصفحة تأخذ 100% من ارتفاع النافذة */
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* توزيع المحتوى بين الهيدر والفوتر */
+}
+
+main {
+    flex: 1; /* يجعل المحتوى الرئيسي يتمدد ليملأ المساحة المتبقية */
+}
+
+footer {
+    background: linear-gradient(to right, #15c3fd, #ff7700); /* لون خلفية جميل */
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    width: 100%;
+    position: relative; /* الوضع الافتراضي */
+    bottom: 0;
+}
+html, body {
+    direction: rtl;
+    text-align: right;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: local('Tajawal'),
+         url('../fonts/Tajawal-Bold.ttf') format('truetype');      
+}
+
+body {
+    font-family: 'Tajawal', sans-serif;
+}  
+
+.navbar {
+    position: relative;
+    height: 70px; /* ارتفاع شريط التنقل */
+    background: linear-gradient(to right, #15c3fd 50%, #e65c00 50%);
+    color: white;
+    z-index: 1050;
+}
+.navbar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%; /* موقع البرق في المنتصف */
+    transform: translateX(-50%) rotate(48deg); /* لإعطاء الميل */
+    width: 96px; /* عرض الزجزاق */
+    height: 100%; /* يغطي ارتفاع الشريط */
+    background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"%3E%3Cpolygon points="0,20 30,40 20,60 60,70 40,100 70,100 100,80 70,50 80,30 50,20 60,0 20,10" fill="white"/%3E%3C/svg%3E') no-repeat;
+    background-size: cover;
+    z-index: 1050; /* فوق التدرج */
+}
+.navbar-nav {
+    display: flex;
+    justify-content: flex-start;
+}
+hidden {
+    display: none;
+}
+/* التنسيق الأساسي للعناصر */
+.navbar-nav .nav-link {
+    color: #333; /* لون النص الأساسي */
+    padding: 10px 15px; /* التباعد بين العناصر */
+    transition: background-color 0.3s ease, color 0.3s ease; /* تأثير عند التمرير */
+}
+/* القائمة المنسدلة */
+.dropdown-menu {
+    background-color: #fff; /* لون خلفية القائمة */
+    border: 1px solid #21a6ff; /* إطار خفيف */
+    border-radius: 5px; /* زوايا دائرية */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* ظل لطيف */
+    padding: 10px 0; /* مسافة داخلية بين العناصر */
+    z-index: 1050; /* التأكد من ظهورها فوق المحتويات الأخرى */
+}
+
+/* العناصر داخل القائمة المنسدلة */
+.dropdown-item {
+    color: #333; /* لون النص */
+    padding: 10px 20px; /* تباعد داخلي */
+    transition: background-color 0.3s ease, color 0.3s ease; /* تأثير حركة */
+}
+
+/* التأثير عند تمرير الفأرة على عنصر */
+.dropdown-item:hover {
+    background-color: #ff5500; /* لون خلفية عند التمرير */
+    color: rgb(54, 151, 255); /* لون النص عند التمرير */
+    border-radius: 5px; /* زوايا دائرية للتأثير */
+}
+/* التأثير عند تمرير الفأرة */
+.navbar-nav .nav-link:hover {
+    background-color: #4fa4ff; /* خلفية زرقاء */
+    color: white; /* نص أبيض */
+    border-radius: 5px; /* زوايا دائرية */
+}
+/* التأثير عند تمرير الفأرة على "تسجيل الدخول" */
+.navbar-nav .nav-link.login:hover {
+    background-color: rgba(255, 104, 3, 0.958); /* لون برتقالي شفاف */
+    color: white; /* نص أبيض */
+    border-radius: 5px; /* زوايا دائرية */
+}
+.navbar-nav .nav-link.register:hover {
+    background-color: rgba(255, 104, 3, 0.958); /* لون برتقالي شفاف */
+    color: white; /* نص أبيض */
+    border-radius: 5px; /* زوايا دائرية */
+}
+
+/* العناصر في القائمة المنسدلة */
+.navbar-collapse.show .nav-link {
+    background-color: #15c3fd79; /* خلفية خفيفة */
+    margin: 5px 0; /* مسافة بين العناصر */
+    border-radius: 5px; /* زوايا دائرية */
+}
+
+/* التأثير على العنصر النشط */
+.navbar-nav .nav-item.active .nav-link {
+    background-color: #e65c00; /* خلفية برتقالية */
+    color: rgb(0, 0, 0); /* نص أبيض */
+    font-weight: bold; /* خط عريض */
+}
+
+
+.custom-footer {
+    background: linear-gradient(90deg, #15c3fd 50%, #ff7700 50%); /* لونين مقسمين أفقيًا */
+    color: #ffffff; /* نص أبيض */
+    text-align: center;
+    padding: 10px 0; /* تقليل ارتفاع الفوتر */
+    position: absolute; /* إجبار الفوتر على أن يكون في الأسفل */
+    bottom: 0; /* محاذاة للأسفل */
+    width: 100%; /* ضمان عرض الفوتر بعرض الصفحة */
+}
+
+
+.btn-primary {
+    background-color: #007bff; /* لون أزرق */
+    border-color: #007bff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* لون أزرق أغمق عند التمرير */
+}
+.intro-section {
+    background-color: #f8f9fa; /* لون خلفية فاتح */
+    padding: 50px 0;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.section-subtitle {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.feature-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feature-box i {
+    color: #ff8c00; /* لون الأيقونات */
+    margin-bottom: 15px;
+}
+
+.feature-box h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.feature-box p {
+    font-size: 16px;
+    color: #555;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+body {
+    margin: 0; /* إزالة الهوامش الافتراضية */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* إجبار الصفحة أن تكون بارتفاع النافذة */
+}
+
+main {
+    flex: 1; /* يجعل المحتوى الرئيسي يأخذ المساحة المتبقية */
+}
+.dashboard-section {
+    background-color: #f8f9fa; /* لون خلفية خفيف */
+    padding: 30px 0;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fff;
+}
+
+.card-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ff7700;
+    padding-bottom: 10px;
+}
+
+.list-group-item {
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.list-group-item .badge {
+    float: right;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+.card p {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.card.shadow {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card.bg-light {
+    background-color: #fdfdfd;
+}
+
+.card.bg-white {
+    background-color: #fff;
+}
+.hero-section {
+    background: linear-gradient(to right, #15c3fd, #ff7700);
+    color: #fff;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.features-section {
+    padding: 50px 0;
+}
+
+.features-section h3 {
+    font-size: 22px;
+    margin-top: 15px;
+}
+
+.features-section p {
+    color: #555;
+}
+
+.contact-section {
+    background-color: #f8f9fa;
+    padding: 50px 0;
+}
+
+.contact-section h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.contact-section .btn {
+    margin: 10px;
+    font-size: 16px;
+}
+.custom-btn {
+    font-size: 16px; /* حجم النص أصغر */
+    padding: 8px 16px; /* تقليل التباعد الداخلي */
+    background-color: #d3f1fd; /* لون سماوي فاتح */
+    color: #54a1f4; /* لون النص */
+    border: 1px solid #b8e4f9; /* إطار سماوي فاتح */
+    border-radius: 5px; /* حواف دائرية بسيطة */
+    transition: all 0.3s ease; /* تأثير الحركة عند التمرير */
+}
+
+.custom-btn:hover {
+    transform: translateY(-20px); /* رفع العنصر عند التمرير */
+    background-color: #b8e4f9; /* لون أغمق قليلاً عند التمرير */
+    color: #ff7024; /* لون النص عند التمرير */
+    border-color: #ff6200; /* تعديل لون الإطار عند التمرير */
+}
+.features-section {
+    background-color: #ffffff; /* لون خلفية فاتح */
+    padding: 50px 0; /* تباعد داخلي */
+}
+
+.feature-box {
+    background-color: #ffffff; /* لون الخلفية */
+    border-radius: 10px; /* حواف دائرية */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* تأثير عند التمرير */
+    border: 1px solid #ddd; /* إطار خفيف */
+}
+
+.feature-box:hover {
+    transform: translateY(-20px); /* رفع العنصر عند التمرير */
+    box-shadow: 10 17px 90px rgb(250, 91, 12); /* إضافة ظل */
+}
+
+.feature-title {
+    font-size: 20px; /* حجم النص */
+    color: #333; /* لون النص */
+    margin-top: 15px;
+}
+
+.feature-description {
+    font-size: 5px; /* حجم النص */
+    color: #555; /* لون أغمق للوصف */
+}
+
+.feature-box i {
+    color: inherit; /* لون الأيقونة يعتمد على النص */
+    margin-bottom: 5px; /* مسافة تحت الأيقونة */
+}
+
+.text-primary {
+    color: #fe6e08 !important; /* أزرق */
+}
+
+.text-success {
+    color: #74de8d !important; /* أخضر */
+}
+
+.text-warning {
+    color: hsl(196, 100%, 51%) !important; /* أصفر */
+}
+/* زر "إضافة الطلب" المخصص */
+.custom-submit-btn {
+    background: linear-gradient(to right, #ff7700, #00bfff); /* تدرج بين البرتقالي الداكن والأزرق السماوي الفاتح */
+    color: white;
+    font-size: 16px; /* حجم النص */
+    padding: 10px 20px; /* حجم الزر */
+    border: none; /* إزالة الحدود */
+    border-radius: 5px; /* زوايا مستديرة */
+    cursor: pointer; /* المؤشر يتحول إلى اليد */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* ظل الزر */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* تأثير الحركة */
+}
+
+.custom-submit-btn:hover {
+    transform: scale(1.05); /* تكبير بسيط عند التمرير */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* زيادة الظل عند التمرير */
+    background: linear-gradient(to right, #ff6600, #0099cc); /* تغيير طفيف في الألوان */
+}
+.custom-submit-btn {
+    background: linear-gradient(to right, #ff7700, #00bfff);
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-submit-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+/* تنسيق عام للصفحة */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Tajawal', sans-serif;
+    background-color: #f0f0f0;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+/* إضافة تنسيق للصورة */
+.login-logo {
+    width: 100px; /* يمكنك تغيير هذا الرقم حسب حجم الشعار */
+    height: auto; /* الحفاظ على النسبة الأصلية للارتفاع */
+    margin-bottom: 1px; /* مسافة بين الشعار و الحقول */
+}/* تنسيق النص أسفل الشعار */
+.logo-text {
+    font-size: 18px; /* حجم الخط */
+    color: #000000; /* لون النص */
+    margin-bottom: 40px; /* مسافة بين النص وبقية المحتوى */
+    font-weight: bold; /* جعل الخط عريض */
+}
+
+.login-box {
+    background: linear-gradient(to right, #36b0e0, #ff7700); /* مزيج من اللونين الأزرق الفاتح والبرتقالي */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+}
+/* تنسيق العنوان */
+h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+/* تنسيق الحقول */
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ff0000;
+    border-radius: 5px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    border-color: #007bff;
+}
+
+/* تنسيق الزر */
+button.btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #ed5809;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.btn:hover {
+    background-color: #0056b3;
+}
+
+/* تنسيق رابط التسجيل */
+.signup-link {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.signup-link a {
+    color: #ff5e00;
+    text-decoration: none;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+/* تنسيق الرسائل */
+.messages .alert {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 5px;
+}
+
+.messages .alert.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.messages .alert.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}

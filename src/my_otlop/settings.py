@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,12 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'otlop.apps.OtlopConfig',  # Keep this entry
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'user.apps.UserConfig',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +57,7 @@ ROOT_URLCONF = 'my_otlop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],  # تحديث المسار إلى القوالب العامة
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,11 +78,17 @@ WSGI_APPLICATION = 'my_otlop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'otlop_db_new',  # اسم قاعدة البيانات التي أنشأتها
+        'USER': 'root',  # اسم المستخدم الخاص بقاعدة البيانات
+        'PASSWORD': 'AAWWaaww@@6600',  # كلمة مرور المستخدم (إن لم تكن قد أضفت كلمة مرور، اتركها فارغة)
+        'HOST': 'localhost',  # عنوان الخادم (localhost)
+        'PORT': '3306',  # المنفذ الافتراضي لـ MySQL
+        'OPTIONS': {
+            'charset': 'utf8mb4',  # لتجنب مشاكل الترميز
+        },
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -117,6 +126,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# مكان تجميع الملفات الثابتة
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# إذا كنت تريد استخدام STATICFILES_DIRS
+STATICFILES_DIRS = [
+      os.path.join(BASE_DIR, 'static'),
+      '/Users/ayoubbelhaj/Documents/projects/otlopdelivery/src/static',
+ ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

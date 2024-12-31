@@ -1,0 +1,172 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">لوحة التحكم</h2>
+
+    <!-- نموذج إدخال كلمة المرور -->
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="password">أدخل كلمة المرور لعرض البيانات الحساسة:</label>
+            <input type="password" name="password" id="password" class="form-control" placeholder="كلمة المرور">
+        </div>
+        <button type="submit" class="btn btn-primary">عرض البيانات</button>
+    </form>
+
+    <!-- نموذج تحديد الجرد حسب التاريخ -->
+    <form method="get" class="mb-4">
+        <div class="form-row">
+            <div class="form-group col-md-5">
+                <label for="start_date">من تاريخ:</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}">
+            </div>
+            <div class="form-group col-md-5">
+                <label for="end_date">إلى تاريخ:</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}">
+            </div>
+            <div class="form-group col-md-2 align-self-end">
+                <button type="submit" class="btn btn-secondary">تصفية</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- الإحصائيات -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">إجمالي الطلبات</h5>
+                    <p class="card-text">{{ total_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">الطلبات المعلقة</h5>
+                    <p class="card-text">{{ total_pending }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">إجمالي الربح</h5>
+                    <p class="card-text">{{ total_revenue }} دينار</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">صافي الربح</h5>
+                    <p class="card-text">{{ net_profit }} دينار</p>
+                </div>
+            </div>
+        </div>
+   
+        <div class="col-md-3 mt-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">أكثر المطاعم طلبًا</h5>
+                    <p class="card-text">{{ most_requested_restaurants|default:"لا يوجد" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">أكثر السائقين نشاطًا</h5>
+                    <p class="card-text">{{ most_active_drivers|default:"لا يوجد" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جرد المطاعم الأكثر طلبًا -->
+    <h4 class="mt-5">أكثر 5 مطاعم طلبًا</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم المطعم</th>
+                <th>عدد الطلبات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for restaurant in most_requested_restaurants %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ restaurant.restaurant_name }}</td>
+                <td>{{ restaurant.order_count }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">لا توجد بيانات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- جرد السائقين الأكثر نشاطًا -->
+    <h4 class="mt-5">أكثر 5 سائقين نشاطًا</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم السائق</th>
+                <th>عدد الطلبات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for driver in most_active_drivers %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ driver.delivery_person }}</td>
+                <td>{{ driver.order_count }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">لا توجد بيانات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+     <!-- الطلبات المعلقة -->
+     <h4>الطلبات المعلقة</h4>
+     <table class="table table-striped">
+         <thead>
+             <tr>
+                 <th>#</th>
+                 <th>اسم العميل</th>
+                 <th>التفاصيل</th>
+                 <th>المطعم</th>
+                 <th>السائق</th>
+                 <th>الإجراءات</th>
+             </tr>
+         </thead>
+         <tbody>
+             {% for order in pending_orders %}
+             <tr>
+                 <td>{{ forloop.counter }}</td>
+                 <td>{{ order.customer_name }}</td>
+                 <td>{{ order.order_details }}</td>
+                 <td>{{ order.restaurant_name }}</td>
+                 <td>{{ order.delivery_person }}</td>
+                 <td>
+                     <a href="{% url 'update_order_status' order.id 'delivered' %}" class="btn btn-success btn-sm">تسليم</a>
+                     <a href="{% url 'update_order_status' order.id 'cancelled' %}" class="btn btn-danger btn-sm">إلغاء</a>
+                     <a href="{% url 'order_details' order.id %}" class="btn btn-info btn-sm">عرض التفاصيل</a>
+                 </td>
+             </tr>
+             {% empty %}
+             <tr>
+                 <td colspan="6" class="text-center">لا توجد طلبات معلقة</td>
+             </tr>
+             {% endfor %}
+         </tbody>
+     </table>
+</div>
+{% endblock %}

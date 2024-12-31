@@ -1,0 +1,61 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">إدارة حسابات السائقين</h2>
+
+    <!-- نموذج البحث بالتاريخ -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-5">
+                <label for="start_date">تاريخ البداية</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="col-md-5">
+                <label for="end_date">تاريخ النهاية</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="col-md-2 align-self-end">
+                <button type="submit" class="btn btn-primary w-100">بحث</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- جدول عرض حسابات السائقين -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم السائق</th>
+                <th>عدد الطلبات</th>
+                <th>رقم الهاتف</th>
+                <th>إجمالي الإيرادات</th>
+                <th>إجمالي المدفوعات</th>
+                <th>الرصيد المستحق</th>
+                <th>إجمالي الربح</th>
+                <th>النسبة</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for driver in drivers %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ driver.name }}</td>
+                <td>{{ driver.phone_number }}</td>
+                <td>{{ driver.total_orders }}</td>
+                <td>{{ driver.total_revenue }} دينار</td>
+                <td>{{ driver.percentage }}%</td>
+                <td>
+                    <a href="{% url 'edit_driver' driver.id %}" class="btn btn-warning btn-sm">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">لا توجد بيانات للسائقين</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

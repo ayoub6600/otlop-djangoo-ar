@@ -1,0 +1,19 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+
+{% for driver in drivers %}
+    <tr>
+        <td>{{ driver.name }}</td>
+        <td>{{ driver.payment_status }}</td>
+        <td>
+            {% if driver.payment_status != 'refused' %}
+                <a href="{% url 'record_payment' driver.id %}" class="btn btn-primary">تسجيل دفعة</a>
+            {% else %}
+                <span class="badge badge-danger">تم الرفض</span>
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+
+{% endblock %}

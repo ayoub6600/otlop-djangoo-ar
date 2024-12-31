@@ -1,0 +1,48 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">تعديل الطلب</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="customer_name">اسم العميل</label>
+            <input type="text" name="customer_name" id="customer_name" class="form-control" value="{{ order.customer_name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="customer_area">منطقة العميل</label>
+            <input type="text" name="customer_area" id="customer_area" class="form-control" value="{{ order.customer_area }}">
+        </div>
+        <div class="form-group">
+            <label for="restaurant_name">اسم المطعم</label>
+            <input type="text" name="restaurant_name" id="restaurant_name" class="form-control" value="{{ order.restaurant_name }}">
+        </div>
+        <div class="form-group">
+            <label for="restaurant_area">منطقة المطعم</label>
+            <input type="text" name="restaurant_area" id="restaurant_area" class="form-control" value="{{ order.restaurant_area }}">
+        </div>
+       
+        <div class="form-group">
+            <label for="delivery_price">سعر التوصيل</label>
+            <input type="number" name="delivery_price" id="delivery_price" class="form-control" value="{{ order.delivery_price }}">
+        </div>
+        <div class="form-group">
+            <label for="order_price">سعر الطلبية</label>
+            <input type="number" name="order_price" id="order_price" class="form-control" value="{{ order.order_price }}">
+        </div>
+        <div class="form-group">
+            <label for="notes">ملاحظات</label>
+            <textarea name="notes" id="notes" class="form-control" rows="3">{{ order.notes }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">تحديث الطلب</button>
+        <a href="{% url 'previous_orders' %}" class="btn btn-secondary">إلغاء</a>
+    </form>
+</div>
+{% endblock %}

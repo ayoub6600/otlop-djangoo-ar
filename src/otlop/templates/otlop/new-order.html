@@ -1,0 +1,125 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+{% load static %}
+<div class="container mt-5">
+
+    <!-- عرض الرسائل المنبثقة -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show small-alert" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="text-center mb-4">إضافة طلب جديد</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- اسم الزبون -->
+        <div class="form-group">
+            <label for="customer_name">اسم الزبون</label>
+            <input type="text" id="customer_name" name="customer_name" class="form-control" placeholder="أدخل اسم الزبون" required>
+        </div>
+
+        <!-- منطقة الزبون -->
+        <div class="form-group">
+            <label for="customer_area">منطقة الزبون</label>
+            <input type="text" id="customer_area" name="customer_area" class="form-control" placeholder="أدخل منطقة الزبون" required>
+        </div>
+
+        <!-- اسم المطعم -->
+        <div class="form-group">
+            <label for="restaurant_name">اسم المطعم</label>
+            <input type="text" id="restaurant_name" name="restaurant_name" class="form-control" placeholder="أدخل اسم المطعم" required>
+        </div>
+
+        <!-- منطقة المطعم -->
+        <div class="form-group">
+            <label for="restaurant_area">منطقة المطعم</label>
+            <input type="text" id="restaurant_area" name="restaurant_area" class="form-control" placeholder="أدخل منطقة المطعم" required>
+        </div>
+
+        <!-- تفاصيل الطلب (اختياري) -->
+        <div class="form-group">
+            <label for="order_details">تفاصيل الطلب (اختياري)</label>
+            <textarea id="order_details" name="order_details" class="form-control" rows="3" placeholder="أدخل تفاصيل الطلب"></textarea>
+        </div>
+
+       <!-- سعر التوصيل -->
+       <div class="form-group">
+           <label for="delivery_price">سعر التوصيل (اختياري)</label>
+           <input type="number" id="delivery_price" name="delivery_price" class="form-control" placeholder="أدخل سعر التوصيل">
+       </div>
+
+<!-- سعر الطلبية -->
+       <div class="form-group">
+           <label for="order_price">سعر الطلبية (اختياري)</label>
+           <input type="number" id="order_price" name="order_price" class="form-control" placeholder="أدخل سعر الطلبية">
+       </div>  
+
+        <!-- ملاحظات إضافية -->
+        <div class="form-group">
+            <label for="notes">ملاحظات إضافية (اختياري)</label>
+            <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="أدخل أي ملاحظات إضافية"></textarea>
+        </div>
+
+        <!-- زر الإرسال -->
+        <div class="text-center">
+            <button type="submit" class="custom-submit-btn">إضافة الطلب</button>
+        </div>
+    </form>
+</div>
+<h4>الطلبات المعلقة</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>اسم العميل</th>
+            <th>التفاصيل</th>
+            <th>اسم المطعم</th>
+            <th>السائق</th>
+            <th>الإجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in pending_orders %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ order.customer_name }}</td>
+            <td>{{ order.order_details }}</td>
+            <td>{{ order.restaurant_name }}</td>
+            <td>{{ order.delivery_person }}</td>
+            <td>
+                <a href="{% url 'update_order_status' order.id 'delivered' %}" class="btn btn-success btn-sm">تسليم</a>
+                <a href="{% url 'update_order_status' order.id 'cancelled' %}" class="btn btn-danger btn-sm">إلغاء</a>
+                <a href="{% url 'order_details' order.id %}" class="btn btn-info btn-sm">عرض التفاصيل</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">لا توجد طلبات معلقة</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<!-- JavaScript لإخفاء الرسائل -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            let alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = "opacity 1s ease";
+                alert.style.opacity = 0;
+                setTimeout(function() {
+                    alert.remove();
+                }, 1000); // إزالة العنصر بعد تأثير الإخفاء
+            });
+        }, 2000); // وقت الظهور قبل الاختفاء (2 ثانية)
+    });
+</script>
+{% endblock %}

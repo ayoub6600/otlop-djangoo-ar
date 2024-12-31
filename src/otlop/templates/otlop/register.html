@@ -1,0 +1,32 @@
+
+
+{% block content %}
+<div class="register-container">
+    <div class="register-box">
+        <h2>إنشاء حساب</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">اسم المستخدم:</label>
+                <input type="text" id="username" name="username" required placeholder="أدخل اسم المستخدم">
+            </div>
+            <div class="form-group">
+                <label for="password">كلمة السر:</label>
+                <input type="password" id="password" name="password" required placeholder="أدخل كلمة السر">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">تأكيد كلمة السر:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="أعد إدخال كلمة السر">
+            </div>
+            <div class="form-group">
+                <label for="admin_key">كلمة السر الخاصة بالمدير:</label>
+                <input type="password" id="admin_key" name="admin_key" required placeholder="أدخل كلمة السر الخاصة بالمدير">
+            </div>
+            <button type="submit" class="btn">إنشاء الحساب</button>
+        </form>
+        <div class="login-link">
+            <p>هل لديك حساب بالفعل؟ <a href="{% url 'login' %}">تسجيل الدخول</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

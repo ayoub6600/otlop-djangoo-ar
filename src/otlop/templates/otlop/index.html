@@ -1,0 +1,52 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<section class="hero-section">
+  <div class="container text-center">
+    <h2 class="hero-title"></h2>
+
+        <h2 class="hero-title">مرحبًا بك في شركة أطلب</h2>
+        <p class="hero-subtitle">نقدم لك أسرع وأفضل خدمات التوصيل في جميع أنحاء مدينتك.</p>
+        <a href="/new-order" class="btn custom-btn">اطلب الآن</a>    </div>
+</section>
+
+<section class="features-section py-5">
+    <div class="container">
+        <div class="row text-center">
+            <!-- الميزة الأولى -->
+            <div class="col-md-4">
+                <div class="feature-box shadow-sm p-4">
+                    <i class="fas fa-truck fa-3x text-primary mb-3"></i>
+                    <h3 class="feature-title">توصيل سريع</h3>
+                    <p class="feature-description">نضمن توصيل طلباتك في أسرع وقت وبأفضل جودة.</p>
+                </div>
+            </div>
+            <!-- الميزة الثانية -->
+            <div class="col-md-4">
+                <div class="feature-box shadow-sm p-4">
+                    <i class="fas fa-phone fa-3x text-success mb-3"></i>
+                    <h3 class="feature-title">خدمة عملاء</h3>
+                    <p class="feature-description">فريقنا متواجد لخدمتك على مدار الساعة.</p>
+                </div>
+            </div>
+            <!-- الميزة الثالثة -->
+            <div class="col-md-4">
+                <div class="feature-box shadow-sm p-4">
+                    <i class="fas fa-map-marker-alt fa-3x text-warning mb-3"></i>
+                    <h3 class="feature-title">تغطية واسعة</h3>
+                    <p class="feature-description">نغطي معظم المناطق لتوفير الراحة لجميع عملائنا.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contact-section bg-light py-5">
+    <div class="container text-center">
+        <h3>تواصل معنا</h3>
+        <p>لأي استفسار أو طلبات خاصة، يمكنك التواصل معنا عبر:</p>
+        <a href="https://wa.me/218931331622" class="btn btn-success">واتساب</a>
+        <a href="mailto:otlopdelivery@gmail.com" class="btn btn-info">البريد الإلكتروني</a>
+    </div>
+</section>
+{% endblock %}

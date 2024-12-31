@@ -1,0 +1,38 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>تفاصيل الطلب</h2>
+    <p>اسم الزبون: {{ order.customer_name |default:"غير محدد" }}</p>
+    <p>منطقة الزبون: {{ order.customer_area |default:"غير محدد" }}</p>
+    <p>اسم المطعم: {{ order.restaurant_name |default:"غير محدد" }}</p>
+    <p>منطقة المطعم: {{ order.restaurant_area }}</p>
+    <p>سعر التوصيل: {{ order.delivery_price|default:"غير محدد" }}</p>
+    <p>سعر الطلبية: {{ order.order_price|default:"غير محدد" }}</p>
+    <p>تفاصيل الطلب: {{ order.order_details|default:"غير محدد" }}</p>
+    <p>ملاحظات: {{ order.notes|default:"لا توجد ملاحظات" }}</p>
+    <!-- عرض التفاصيل الجزئية -->
+    <div class="mb-4">
+        <h4>التفاصيل الجزئية</h4>
+        <p>{{ partial_details }}</p>
+    </div>
+
+    <!-- عرض التفاصيل الكاملة -->
+    <div>
+        <h4>التفاصيل الكاملة</h4>
+        <p>{{ full_details }}</p>
+    </div>
+
+    <hr>
+    <a href="{% url 'new_order' %}" class="btn btn-primary">إضافة طلب جديد</a>
+</div>
+
+    <!-- زر التأكيد -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success">تأكيد الطلب</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

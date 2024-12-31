@@ -1,0 +1,70 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">الطلبات السابقة</h2>
+
+    <!-- نموذج البحث بالتاريخ -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-5">
+                <label for="start_date">تاريخ البداية</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+            </div>
+            <div class="col-md-5">
+                <label for="end_date">تاريخ النهاية</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+            </div>
+            <div class="col-md-2 align-self-end">
+                <button type="submit" class="btn btn-primary w-100">بحث</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- جدول عرض الطلبات -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم العميل</th>
+                <th>التفاصيل</th>
+                <th>اسم المطعم</th>
+                <th>اسم السائق</th>
+                <th>تاريخ الطلب</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.order_details }}</td>
+                <td>{{ order.restaurant_name }}</td>
+                <td>{{ order.delivery_person }}</td>
+                <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    {% if order.delivery_status == 'Pending' %}
+                        قيد الانتظار
+                    {% elif order.delivery_status == 'Delivered' %}
+                        تم التسليم
+                    {% elif order.delivery_status == 'Cancelled' %}
+                        تم الإلغاء
+                    {% else %}
+                        غير معروف
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'edit_order' order.id %}" class="btn btn-warning btn-sm">تعديل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">لا توجد طلبات سابقة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
