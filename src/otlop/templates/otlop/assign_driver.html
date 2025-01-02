@@ -1,0 +1,20 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>تحديد سائق للطلب</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="driver">اختر السائق:</label>
+            <select name="driver" id="driver" class="form-control" required>
+                {% for driver in drivers %}
+                    <option value="{{ driver.id }}">{{ driver.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">تعيين السائق</button>
+        <a href="{% url 'previous_orders' %}" class="btn btn-secondary">إلغاء</a>
+    </form>
+</div>
+{% endblock %}

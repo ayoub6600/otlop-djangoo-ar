@@ -2,19 +2,36 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">تسجيل دفعة للسائق {{ driver.name }}</h2>
+    <h2 class="mb-4">تسجيل دفعة للسائق: {{ driver.name }}</h2>
     <form method="post">
         {% csrf_token %}
+        <!-- حقل إدخال المبلغ -->
         <div class="form-group">
             <label for="amount">المبلغ</label>
             <input type="number" name="amount" id="amount" class="form-control" required>
         </div>
+        
+        <!-- حقل اختيار طريقة الدفع -->
+        <div class="form-group">
+            <label for="payment_method">طريقة الدفع</label>
+            <select name="payment_method" id="payment_method" class="form-control">
+                <option value="Cash">نقداً</option>
+                <option value="Bank Transfer">تحويل بنكي</option>
+                <option value="Other">أخرى</option>
+            </select>
+        </div>
+        
+        <!-- حقل إدخال الملاحظات -->
         <div class="form-group">
             <label for="notes">ملاحظات</label>
             <textarea name="notes" id="notes" class="form-control" rows="3"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">تسجيل الدفعة</button>
-        <a href="drivers_list" class="btn btn-secondary">إلغاء</a>
+        
+        <!-- أزرار الإجراء -->
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">تسجيل الدفعة</button>
+            <a href="{% url 'drivers_list' %}" class="btn btn-secondary">إلغاء</a>
+        </div>
     </form>
 </div>
 {% endblock %}

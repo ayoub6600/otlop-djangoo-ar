@@ -3,7 +3,6 @@
 {% block content %}
 {% load static %}
 <div class="container mt-5">
-
     <!-- عرض الرسائل المنبثقة -->
     {% if messages %}
     <div class="container mt-3">
@@ -50,17 +49,28 @@
             <textarea id="order_details" name="order_details" class="form-control" rows="3" placeholder="أدخل تفاصيل الطلب"></textarea>
         </div>
 
-       <!-- سعر التوصيل -->
-       <div class="form-group">
+        <!-- سعر التوصيل -->
+        <div class="form-group">
            <label for="delivery_price">سعر التوصيل (اختياري)</label>
            <input type="number" id="delivery_price" name="delivery_price" class="form-control" placeholder="أدخل سعر التوصيل">
        </div>
 
-<!-- سعر الطلبية -->
-       <div class="form-group">
+        <!-- سعر الطلبية -->
+        <div class="form-group">
            <label for="order_price">سعر الطلبية (اختياري)</label>
            <input type="number" id="order_price" name="order_price" class="form-control" placeholder="أدخل سعر الطلبية">
        </div>  
+
+        <!-- اختيار السائق -->
+        <div class="form-group">
+            <label for="delivery_person">اختيار السائق</label>
+            <select id="delivery_person" name="delivery_person" class="form-control">
+                <option value="">اختر السائق</option>
+                {% for driver in drivers %}
+                <option value="{{ driver.id }}">{{ driver.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
         <!-- ملاحظات إضافية -->
         <div class="form-group">
@@ -74,7 +84,8 @@
         </div>
     </form>
 </div>
-<h4>الطلبات المعلقة</h4>
+
+<h4 class="mt-5">الطلبات المعلقة</h4>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -107,6 +118,7 @@
         {% endfor %}
     </tbody>
 </table>
+
 <!-- JavaScript لإخفاء الرسائل -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {

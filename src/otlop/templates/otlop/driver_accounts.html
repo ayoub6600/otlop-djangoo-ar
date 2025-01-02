@@ -22,40 +22,65 @@
     </form>
 
     <!-- جدول عرض حسابات السائقين -->
-    <table class="table table-striped">
+    <table class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>#</th>
                 <th>اسم السائق</th>
-                <th>عدد الطلبات</th>
                 <th>رقم الهاتف</th>
+                <th>عدد الطلبات</th>
                 <th>إجمالي الإيرادات</th>
                 <th>إجمالي المدفوعات</th>
                 <th>الرصيد المستحق</th>
-                <th>إجمالي الربح</th>
-                <th>النسبة</th>
+                <th>نسبة السائق</th>
+                <th>صافي الربح من السائق</th>
+                <th>نسبة الشركة</th>
                 <th>الإجراءات</th>
             </tr>
         </thead>
         <tbody>
-            {% for driver in drivers %}
+            {% for driver in driver_data %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ driver.name }}</td>
-                <td>{{ driver.phone_number }}</td>
+                <td>{{ driver.driver.name }}</td>
+                <td>{{ driver.driver.phone_number }}</td>
                 <td>{{ driver.total_orders }}</td>
                 <td>{{ driver.total_revenue }} دينار</td>
+                <td>{{ driver.total_paid }} دينار</td>
+                <td>{{ driver.due_amount }} دينار</td>
                 <td>{{ driver.percentage }}%</td>
+                <td>{{ driver.net_profit }} دينار</td>
+                <td>{{ driver.company_percentage }}%</td>
                 <td>
-                    <a href="{% url 'edit_driver' driver.id %}" class="btn btn-warning btn-sm">تعديل</a>
+                    <a href="{% url 'driver_details' driver.driver.id %}" class="btn btn-info btn-sm">تفاصيل</a>
+                    <a href="{% url 'record_payment' driver.driver.id %}" class="btn btn-success btn-sm">إضافة دفعة</a>
+                    <a href="{% url 'edit_driver' driver.driver.id %}" class="btn btn-warning btn-sm">تعديل</a>
+                    <a href="{% url 'delete_driver' driver.driver.id %}" class="btn btn-danger btn-sm">حذف</a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center">لا توجد بيانات للسائقين</td>
+                <td colspan="11" class="text-center">لا توجد بيانات للسائقين</td>
             </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-end font-weight-bold">المجموع:</td>
+                <td>{{ total_orders_count }}</td>
+                <td>{{ total_revenue }} دينار</td>
+                <td>{{ total_paid }} دينار</td>
+                <td>{{ total_due_amount }} دينار</td>
+                <td>{{ average_percentage }}%</td>
+                <td>{{ total_net_profit }} دينار</td>
+                <td>{{ total_company_percentage }}%</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td colspan="8" class="text-end font-weight-bold">نسبة الشركة الكلية:</td>
+                <td colspan="3">{{ total_company_percentage }}%</td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 {% endblock %}

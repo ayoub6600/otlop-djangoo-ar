@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- عنوان الصفحة وزر إضافة سائق -->
+    <!-- عنوان الصفحة وأزرار التحكم -->
     <div class="d-flex justify-content-between mb-3">
         <h2 class="mb-4">قائمة السائقين</h2>
         <a href="{% url 'add_driver' %}" class="btn btn-primary">
@@ -13,14 +13,14 @@
     <!-- نموذج البحث -->
     <form method="get" class="mb-4">
         <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="ابحث باسم السائق أو رقم الهاتف" value="{{ query|default_if_none:'' }}">
-            <button class="btn btn-outline-secondary" type="submit">بحث</button>
+            <input type="text" name="q" class="form-control" placeholder="ابحث باسم السائق أو رقم الهاتف" value="{{ query }}">
+            <button class="btn btn-primary" type="submit">بحث</button>
         </div>
     </form>
 
     <!-- جدول عرض السائقين -->
     <table class="table table-striped">
-        <thead>
+        <thead class="table-dark">
             <tr>
                 <th>اسم السائق</th>
                 <th>عدد الطلبات</th>
@@ -50,7 +50,7 @@
                 </td>
                 <td>
                     <a href="{% url 'record_payment' driver.id %}" class="btn btn-primary btn-sm">تسجيل دفعة</a>
-                    <a href="{% url 'edit_driver' driver.id %}" class="btn btn-primary btn-sm">تعديل</a>
+                    <a href="{% url 'edit_driver' driver.id %}" class="btn btn-warning btn-sm">تعديل</a>
                     <a href="{% url 'delete_driver' driver.id %}" class="btn btn-danger btn-sm">حذف</a>
                     <a href="{% url 'driver_details' driver.id %}" class="btn btn-info btn-sm">
                         <i class="fas fa-info-circle"></i> تفاصيل
@@ -64,24 +64,5 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <!-- أزرار التنقل بين الصفحات -->
-    <nav>
-        <ul class="pagination">
-            {% if drivers.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?q={{ query }}&page={{ drivers.previous_page_number }}">السابق</a>
-            </li>
-            {% endif %}
-            <li class="page-item">
-                <span class="page-link">{{ drivers.number }} من {{ drivers.paginator.num_pages }}</span>
-            </li>
-            {% if drivers.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?q={{ query }}&page={{ drivers.next_page_number }}">التالي</a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
 </div>
 {% endblock %}

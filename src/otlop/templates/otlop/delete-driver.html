@@ -1,0 +1,17 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">حذف السائق {{ driver.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <p>هل أنت متأكد أنك تريد حذف السائق <strong>{{ driver.name }}</strong>؟</p>
+        <div class="form-group mb-3">
+            <label for="secret_code">الرمز السري <span class="text-danger">*</span></label>
+            <input type="password" name="secret_code" id="secret_code" class="form-control" placeholder="أدخل الرمز السري" required>
+        </div>
+        <button type="submit" class="btn btn-danger">حذف</button>
+        <a href="{% url 'drivers_list' %}" class="btn btn-secondary">إلغاء</a>
+    </form>
+</div>
+{% endblock %}

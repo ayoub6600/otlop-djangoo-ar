@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">لوحة التحكم</h2>
+    <h1 class="text-center mb-4">لوحة التحكم</h1>
 
     <!-- نموذج إدخال كلمة المرور -->
     <form method="post" class="mb-4">
@@ -32,9 +32,9 @@
     </form>
 
     <!-- الإحصائيات -->
-    <div class="row mb-5">
+    <div class="row text-center">
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card bg-primary text-white">
                 <div class="card-body">
                     <h5 class="card-title">إجمالي الطلبات</h5>
                     <p class="card-text">{{ total_orders }}</p>
@@ -42,50 +42,53 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card bg-warning text-white">
                 <div class="card-body">
                     <h5 class="card-title">الطلبات المعلقة</h5>
-                    <p class="card-text">{{ total_pending }}</p>
+                    <p class="card-text">{{ pending_orders.count }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5 class="card-title">إجمالي الربح</h5>
-                    <p class="card-text">{{ total_revenue }} دينار</p>
+                    <h5 class="card-title">الطلبات المسلمة</h5>
+                    <p class="card-text">{{ delivered_orders.count }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">الطلبات الملغية</h5>
+                    <p class="card-text">{{ cancelled_orders.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإيرادات -->
+    <div class="row my-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">إجمالي الإيرادات</h5>
+                    <p class="card-text"><strong>{{ total_revenue }}</strong> دينار</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">صافي الربح</h5>
-                    <p class="card-text">{{ net_profit }} دينار</p>
-                </div>
-            </div>
-        </div>
-   
-        <div class="col-md-3 mt-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">أكثر المطاعم طلبًا</h5>
-                    <p class="card-text">{{ most_requested_restaurants|default:"لا يوجد" }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mt-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">أكثر السائقين نشاطًا</h5>
-                    <p class="card-text">{{ most_active_drivers|default:"لا يوجد" }}</p>
+                    <p class="card-text"><strong>{{ net_profit }}</strong> دينار</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- جرد المطاعم الأكثر طلبًا -->
-    <h4 class="mt-5">أكثر 5 مطاعم طلبًا</h4>
+    <h4 class="mt-5">أكثر المطاعم طلبًا</h4>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -110,7 +113,7 @@
     </table>
 
     <!-- جرد السائقين الأكثر نشاطًا -->
-    <h4 class="mt-5">أكثر 5 سائقين نشاطًا</h4>
+    <h4 class="mt-5">أكثر السائقين نشاطًا</h4>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -134,39 +137,39 @@
         </tbody>
     </table>
 
-     <!-- الطلبات المعلقة -->
-     <h4>الطلبات المعلقة</h4>
-     <table class="table table-striped">
-         <thead>
-             <tr>
-                 <th>#</th>
-                 <th>اسم العميل</th>
-                 <th>التفاصيل</th>
-                 <th>المطعم</th>
-                 <th>السائق</th>
-                 <th>الإجراءات</th>
-             </tr>
-         </thead>
-         <tbody>
-             {% for order in pending_orders %}
-             <tr>
-                 <td>{{ forloop.counter }}</td>
-                 <td>{{ order.customer_name }}</td>
-                 <td>{{ order.order_details }}</td>
-                 <td>{{ order.restaurant_name }}</td>
-                 <td>{{ order.delivery_person }}</td>
-                 <td>
-                     <a href="{% url 'update_order_status' order.id 'delivered' %}" class="btn btn-success btn-sm">تسليم</a>
-                     <a href="{% url 'update_order_status' order.id 'cancelled' %}" class="btn btn-danger btn-sm">إلغاء</a>
-                     <a href="{% url 'order_details' order.id %}" class="btn btn-info btn-sm">عرض التفاصيل</a>
-                 </td>
-             </tr>
-             {% empty %}
-             <tr>
-                 <td colspan="6" class="text-center">لا توجد طلبات معلقة</td>
-             </tr>
-             {% endfor %}
-         </tbody>
-     </table>
+    <!-- الطلبات المعلقة -->
+    <h4 class="mt-5">الطلبات المعلقة</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم العميل</th>
+                <th>التفاصيل</th>
+                <th>اسم المطعم</th>
+                <th>السائق</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in pending_orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.order_details }}</td>
+                <td>{{ order.restaurant_name }}</td>
+                <td>{{ order.delivery_person }}</td>
+                <td>
+                    <a href="{% url 'update_order_status' order.id 'delivered' %}" class="btn btn-success btn-sm">تسليم</a>
+                    <a href="{% url 'update_order_status' order.id 'cancelled' %}" class="btn btn-danger btn-sm">إلغاء</a>
+                    <a href="{% url 'order_details' order.id %}" class="btn btn-info btn-sm">عرض التفاصيل</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">لا توجد طلبات معلقة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

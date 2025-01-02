@@ -2,47 +2,84 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">تعديل الطلب</h2>
-    <form method="post">
+    <h2 class="mb-4 text-center">تعديل الطلب</h2>
+
+    <!-- عرض الرسائل -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- نموذج تعديل الطلب -->
+    <form method="post" class="border p-4 shadow-sm bg-light rounded">
         {% csrf_token %}
-        {% if messages %}
-        <div class="alert alert-danger">
-            {% for message in messages %}
-                {{ message }}
-            {% endfor %}
+
+        <!-- اسم العميل -->
+        <div class="form-group mb-3">
+            <label for="customer_name" class="form-label">اسم العميل <span class="text-danger">*</span></label>
+            <input type="text" name="customer_name" id="customer_name" class="form-control" value="{{ order.customer_name }}" placeholder="أدخل اسم العميل" required>
         </div>
-        {% endif %}
-        <div class="form-group">
-            <label for="customer_name">اسم العميل</label>
-            <input type="text" name="customer_name" id="customer_name" class="form-control" value="{{ order.customer_name }}" required>
+
+        <!-- منطقة العميل -->
+        <div class="form-group mb-3">
+            <label for="customer_area" class="form-label">منطقة العميل</label>
+            <input type="text" name="customer_area" id="customer_area" class="form-control" value="{{ order.customer_area }}" placeholder="أدخل منطقة العميل">
         </div>
-        <div class="form-group">
-            <label for="customer_area">منطقة العميل</label>
-            <input type="text" name="customer_area" id="customer_area" class="form-control" value="{{ order.customer_area }}">
+
+        <!-- اسم المطعم -->
+        <div class="form-group mb-3">
+            <label for="restaurant_name" class="form-label">اسم المطعم <span class="text-danger">*</span></label>
+            <input type="text" name="restaurant_name" id="restaurant_name" class="form-control" value="{{ order.restaurant_name }}" placeholder="أدخل اسم المطعم" required>
         </div>
-        <div class="form-group">
-            <label for="restaurant_name">اسم المطعم</label>
-            <input type="text" name="restaurant_name" id="restaurant_name" class="form-control" value="{{ order.restaurant_name }}">
+
+        <!-- منطقة المطعم -->
+        <div class="form-group mb-3">
+            <label for="restaurant_area" class="form-label">منطقة المطعم</label>
+            <input type="text" name="restaurant_area" id="restaurant_area" class="form-control" value="{{ order.restaurant_area }}" placeholder="أدخل منطقة المطعم">
         </div>
-        <div class="form-group">
-            <label for="restaurant_area">منطقة المطعم</label>
-            <input type="text" name="restaurant_area" id="restaurant_area" class="form-control" value="{{ order.restaurant_area }}">
+
+        <!-- سعر التوصيل -->
+        <div class="form-group mb-3">
+            <label for="delivery_price" class="form-label">سعر التوصيل</label>
+            <input type="number" name="delivery_price" id="delivery_price" class="form-control" value="{{ order.delivery_price }}" placeholder="أدخل سعر التوصيل">
         </div>
-       
-        <div class="form-group">
-            <label for="delivery_price">سعر التوصيل</label>
-            <input type="number" name="delivery_price" id="delivery_price" class="form-control" value="{{ order.delivery_price }}">
+
+        <!-- سعر الطلبية -->
+        <div class="form-group mb-3">
+            <label for="order_price" class="form-label">سعر الطلبية</label>
+            <input type="number" name="order_price" id="order_price" class="form-control" value="{{ order.order_price }}" placeholder="أدخل سعر الطلبية">
         </div>
-        <div class="form-group">
-            <label for="order_price">سعر الطلبية</label>
-            <input type="number" name="order_price" id="order_price" class="form-control" value="{{ order.order_price }}">
+
+        <!-- ملاحظات -->
+        <div class="form-group mb-3">
+            <label for="notes" class="form-label">ملاحظات إضافية</label>
+            <textarea name="notes" id="notes" class="form-control" rows="4" placeholder="أدخل أي ملاحظات إضافية">{{ order.notes }}</textarea>
         </div>
-        <div class="form-group">
-            <label for="notes">ملاحظات</label>
-            <textarea name="notes" id="notes" class="form-control" rows="3">{{ order.notes }}</textarea>
+        
+        <!-- السائق -->
+        <div class="form-group mb-3">
+            <label for="delivery_person" class="form-label">السائق</label>
+            <select name="delivery_person" id="delivery_person" class="form-control">
+                <option value="">اختيار السائق</option>
+                {% for driver in drivers %}
+                    <option value="{{ driver.id }}" {% if order.delivery_person == driver %}selected{% endif %}>
+                        {{ driver.name }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
-        <button type="submit" class="btn btn-primary">تحديث الطلب</button>
-        <a href="{% url 'previous_orders' %}" class="btn btn-secondary">إلغاء</a>
+
+        <!-- الأزرار -->
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary w-50">تحديث الطلب</button>
+            <a href="{% url 'previous_orders' %}" class="btn btn-secondary w-50">إلغاء</a>
+        </div>
     </form>
 </div>
 {% endblock %}

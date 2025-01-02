@@ -1,0 +1,31 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">نتائج البحث عن: "{{ query }}"</h2>
+
+    {% if orders %}
+        <h3>الطلبات:</h3>
+        <ul class="list-group mb-4">
+            {% for order in orders %}
+                <li class="list-group-item">
+                    <strong>{{ order.customer_name }}</strong>
+                    <p>{{ order.restaurant_name }} - {{ order.customer_area }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if drivers %}
+        <h3>السائقون:</h3>
+        <ul class="list-group">
+            {% for driver in drivers %}
+                <li class="list-group-item">
+                    <strong>{{ driver.name }}</strong>
+                    <p>رقم الهاتف: {{ driver.phone_number }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

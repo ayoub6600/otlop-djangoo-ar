@@ -2,37 +2,56 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>تفاصيل الطلب</h2>
-    <p>اسم الزبون: {{ order.customer_name |default:"غير محدد" }}</p>
-    <p>منطقة الزبون: {{ order.customer_area |default:"غير محدد" }}</p>
-    <p>اسم المطعم: {{ order.restaurant_name |default:"غير محدد" }}</p>
-    <p>منطقة المطعم: {{ order.restaurant_area }}</p>
-    <p>سعر التوصيل: {{ order.delivery_price|default:"غير محدد" }}</p>
-    <p>سعر الطلبية: {{ order.order_price|default:"غير محدد" }}</p>
-    <p>تفاصيل الطلب: {{ order.order_details|default:"غير محدد" }}</p>
-    <p>ملاحظات: {{ order.notes|default:"لا توجد ملاحظات" }}</p>
+    <h2 class="text-center mb-4">تفاصيل الطلب</h2>
+
+    <!-- تفاصيل الطلب -->
+    <div class="card shadow-sm p-4 mb-4 bg-light">
+        <h4 class="card-title text-primary">معلومات الزبون</h4>
+        <p><strong>اسم الزبون:</strong> {{ order.customer_name |default:"غير محدد" }}</p>
+        <p><strong>منطقة الزبون:</strong> {{ order.customer_area |default:"غير محدد" }}</p>
+    </div>
+
+    <div class="card shadow-sm p-4 mb-4 bg-light">
+        <h4 class="card-title text-primary">معلومات المطعم</h4>
+        <p><strong>اسم المطعم:</strong> {{ order.restaurant_name |default:"غير محدد" }}</p>
+        <p><strong>منطقة المطعم:</strong> {{ order.restaurant_area |default:"غير محدد" }}</p>
+    </div>
+
+    <div class="card shadow-sm p-4 mb-4 bg-light">
+        <h4 class="card-title text-primary">تفاصيل التوصيل</h4>
+        <p><strong>سعر التوصيل:</strong> {{ order.delivery_price |default:"غير محدد" }} دينار</p>
+        <p><strong>سعر الطلبية:</strong> {{ order.order_price |default:"غير محدد" }} دينار</p>
+    </div>
+
+    <div class="card shadow-sm p-4 mb-4 bg-light">
+        <h4 class="card-title text-primary">ملاحظات إضافية</h4>
+        <p><strong>تفاصيل الطلب:</strong> {{ order.order_details |default:"غير محدد" }}</p>
+        <p><strong>ملاحظات:</strong> {{ order.notes |default:"لا توجد ملاحظات" }}</p>
+    </div>
+
     <!-- عرض التفاصيل الجزئية -->
-    <div class="mb-4">
-        <h4>التفاصيل الجزئية</h4>
+    <div class="card shadow-sm p-4 mb-4 bg-light">
+        <h4 class="card-title text-primary">التفاصيل الجزئية</h4>
         <p>{{ partial_details }}</p>
     </div>
 
     <!-- عرض التفاصيل الكاملة -->
-    <div>
-        <h4>التفاصيل الكاملة</h4>
+    <div class="card shadow-sm p-4 mb-4 bg-light">
+        <h4 class="card-title text-primary">التفاصيل الكاملة</h4>
         <p>{{ full_details }}</p>
     </div>
 
-    <hr>
-    <a href="{% url 'new_order' %}" class="btn btn-primary">إضافة طلب جديد</a>
-</div>
+    <!-- الأزرار -->
+    <div class="text-center mt-4">
+        <a href="{% url 'new_order' %}" class="btn btn-primary me-2">إضافة طلب جديد</a>
+        <a href="{% url 'edit_order' order.id %}" class="btn btn-warning me-2">تعديل الطلب</a>
+        <a href="{% url 'previous_orders' %}" class="btn btn-secondary">العودة</a>
+    </div>
 
     <!-- زر التأكيد -->
-    <form method="post">
+    <form method="post" class="text-center mt-4">
         {% csrf_token %}
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-success">تأكيد الطلب</button>
-        </div>
+        <button type="submit" class="btn btn-success w-50">تأكيد الطلب</button>
     </form>
 </div>
 {% endblock %}

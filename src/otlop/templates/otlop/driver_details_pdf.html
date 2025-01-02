@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تفاصيل السائق</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h2>تفاصيل السائق: {{ driver.name }}</h2>
+    <p>رقم الهاتف: {{ driver.phone_number }}</p>
+    <p>نوع المركبة: {{ driver.vehicle_type }}</p>
+    <p>إجمالي الطلبات: {{ orders.count }}</p>
+    <p>إجمالي العوائد: {{ driver.total_paid }}</p>
+    <p>المبالغ المستحقة: {{ driver.due_amount }}</p>
+    
+    <h3>تفاصيل الطلبات:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>رقم الطلب</th>
+                <th>اسم العميل</th>
+                <th>سعر التوصيل</th>
+                <th>حالة الطلب</th>
+                <th>تاريخ الطلب</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.delivery_price }}</td>
+                <td>{{ order.delivery_status }}</td>
+                <td>{{ order.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

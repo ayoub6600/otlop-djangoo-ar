@@ -1,0 +1,58 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">البحث في الطلبات السابقة</h2>
+
+    <!-- نموذج البحث -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-8">
+                <input type="text" name="q" class="form-control" placeholder="أدخل النص للبحث..." value="{{ query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="filter_by" class="form-control">
+                    <option value="">بحث عام</option>
+                    <option value="customer_name" {% if filter_by == 'customer_name' %}selected{% endif %}>اسم الزبون</option>
+                    <option value="restaurant_name" {% if filter_by == 'restaurant_name' %}selected{% endif %}>اسم المطعم</option>
+                    <option value="driver_name" {% if filter_by == 'driver_name' %}selected{% endif %}>اسم السائق</option>
+                    <option value="date" {% if filter_by == 'date' %}selected{% endif %}>تاريخ الطلب</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">بحث</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- عرض النتائج -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم الزبون</th>
+                <th>التفاصيل</th>
+                <th>اسم المطعم</th>
+                <th>اسم السائق</th>
+                <th>تاريخ الطلب</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.order_details }}</td>
+                <td>{{ order.restaurant_name }}</td>
+                <td>{{ order.delivery_person.name }}</td>
+                <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">لا توجد نتائج مطابقة.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

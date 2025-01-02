@@ -1,0 +1,50 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">البحث الشامل</h2>
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="ابحث عن الطلبات أو السائقين..." value="{{ query|default_if_none:'' }}">
+            <button class="btn btn-outline-secondary" type="submit">بحث</button>
+        </div>
+    </form>
+
+    {% if query %}
+        <h3>نتائج البحث لـ "{{ query }}"</h3>
+
+        <!-- عرض الطلبات -->
+        {% if orders %}
+            <h4>الطلبات</h4>
+            <ul class="list-group mb-4">
+                {% for order in orders %}
+                <li class="list-group-item">
+                    <a href="{% url 'order_details' order.id %}">
+                        طلب رقم {{ order.id }} - {{ order.customer_name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- عرض السائقين -->
+        {% if drivers %}
+            <h4>السائقون</h4>
+            <ul class="list-group">
+                {% for driver in drivers %}
+                <li class="list-group-item">
+                    <a href="{% url 'driver_details' driver.id %}">
+                        السائق: {{ driver.name }} - {{ driver.phone_number }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- رسالة إذا لم توجد نتائج -->
+        {% if not orders and not drivers %}
+            <p class="text-muted">لا توجد نتائج مطابقة للبحث.</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
