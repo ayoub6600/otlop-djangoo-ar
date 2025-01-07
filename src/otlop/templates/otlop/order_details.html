@@ -51,7 +51,7 @@
     <!-- زر التأكيد -->
     <form method="post" class="text-center mt-4">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success w-50">تأكيد الطلب</button>
+        <a href="{% url 'new_order' %}" class="btn btn-success w-50">تأكيد الطلب</a>
     </form>
 </div>
 {% endblock %}

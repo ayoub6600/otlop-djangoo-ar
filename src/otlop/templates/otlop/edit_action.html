@@ -1,0 +1,11 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+  <h2 class="my-4">تعديل الإجراء</h2>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+    <a href="{% url 'employee_detail' action.employee.id %}" class="btn btn-secondary">إلغاء</a>
+  </form>
+{% endblock %}

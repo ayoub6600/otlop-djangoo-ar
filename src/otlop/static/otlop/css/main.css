@@ -44,7 +44,7 @@ footer {
 
 /* لتنسيق الروابط داخل شريط التنقل */
 .navbar-nav .nav-link {
-    color: #333; /* لون النص */
+    color: #494949; /* لون النص */
     padding: 10px 15px; /* الحشو الداخلي */
     transition: background-color 0.3s ease, color 0.3s ease; /* تأثيرات الانتقال */
 }
@@ -56,11 +56,49 @@ footer {
     border-radius: 5px; /* زوايا مستديرة */
 }
 
-/* لتنسيق الرابط النشط */
-.navbar-nav .nav-item.active .nav-link {
-    background-color: #e65c00; /* لون الخلفية */
-    color: #000; /* لون النص */
+/* الزر عندما لا يكون مضغوطًا (الحالة العادية) */
+.navbar-nav .nav-item .nav-link {
+    background-color: #15c3fd; /* اللون البرتقالي */
+    color: white; /* اللون الأبيض للنص */
+    font-weight: normal; /* نص عادي */
+    transition: all 0.3s ease; /* تأثير الانتقال عند التغيير */
+}
+/* الزر داخل القائمة المنسدلة (الحالة العادية) */
+.navbar-nav .nav-item .dropdown-menu .dropdown-item {
+    background-color: #15c3fdb1; /* اللون البرتقالي */
+    color: white; /* لون النص أبيض */
+    font-weight: normal; /* نص عادي */
+    transition: all 0.3s ease; /* تأثير الانتقال */
+}
+
+/* عند الضغط على العناصر داخل القائمة المنسدلة */
+.navbar-nav .nav-item .dropdown-menu .dropdown-item:active {
+    background-color: #f47105; /* الأزرق السماوي الفاتح عند الضغط */
+    color: white; /* لون النص أبيض */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* تأثير الظل */
+    transform: scale(1.05); /* تكبير العنصر عند الضغط */
+}
+
+/* عند المرور على العناصر داخل القائمة المنسدلة */
+.navbar-nav .nav-item .dropdown-menu .dropdown-item:hover {
+    background-color: #ff5500; /* اللون البرتقالي الفاتح عند المرور */
+    color: white; /* لون النص أبيض */
+    transform: scale(1.05); /* تكبير العنصر عند المرور */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* تأثير الظل عند المرور */
+}
+/* الزر عند الضغط عليه (حالة active) */
+.navbar-nav .nav-item.active .nav-link,
+.navbar-nav .nav-item .nav-link:active {
+    background-color: #ff5900; /* الأزرق السماوي الفاتح عند الضغط */
+    color: white; /* لون النص أبيض */
     font-weight: bold; /* نص عريض */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* تأثير الظل عند الضغط */
+}
+
+/* الزر عند المرور عليه (حالة hover) */
+.navbar-nav .nav-item .nav-link:hover {
+    background-color: #fd6e15; /* اللون البرتقالي الفاتح عند المرور */
+    color: white; /* لون النص أبيض */
 }
 
 /* لتنسيق الفوتر المخصص */
@@ -138,7 +176,69 @@ footer {
     font-size: 16px; /* حجم النص */
     color: #555; /* لون النص */
 }
+/* تعديل الألوان للزر والإدخالات */
+.custom-submit-btn {
+    background: linear-gradient(to right, #fa6a11, #00bfff); /* تدرج بين البرتقالي والأزرق السماوي */
+    color: white; /* لون النص */
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
+/* تأثير عند المرور على الزر */
+.custom-submit-btn:hover {
+    background: linear-gradient(to right, #ff8c00, #00bfff); /* تأثير عند المرور */
+    transform: scale(1.05); /* تكبير الزر عند المرور */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* تأثير الظل */
+}
+
+/* تغيير اللون في الحقول عندما يمر الماوس عليها */
+.form-control:focus {
+    border-color: #fa6a11; /* حدود باللون البرتقالي عند التركيز */
+    background-color: #f0f8ff; /* تغيير لون الخلفية عند التركيز */
+}
+
+/* تأثير على الرسائل المنبثقة */
+.alert {
+    background-color: #38fa11; /* لون الخلفية البرتقالي */
+    color: white;
+    border-radius: 5px;
+}
+
+/* عند مرور الماوس على الرسائل المنبثقة */
+.alert:hover {
+    background-color: #ff8c0079; /* تغيير اللون عند المرور */
+}
+
+/* تخصيص الجدول */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f0f8ff; /* خلفية خفيفة بين الصفوف */
+}
+
+.table thead {
+    background-color: #fa6a11; /* تلوين رأس الجدول باللون البرتقالي */
+    color: white;
+}
+
+/* تخصيص الأزرار في الجدول */
+.btn {
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+/* تأثير عند الضغط على الأزرار في الجدول */
+.btn:hover {
+    transform: scale(1.05); /* تكبير الأزرار عند المرور */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* تأثير الظل */
+}
+h2.text-center.mb-4 {
+    border-bottom: 2px solid #fa6a11; /* خط برتقالي أسفل العنوان */
+    padding-bottom: 10px; /* مسافة بين النص والخط */
+    margin-bottom: 20px; /* مسافة أسفل العنوان */
+}
 /* لتنسيق البطاقات */
 .card {
     border: 1px solid #ddd; /* حدود */
@@ -159,7 +259,7 @@ footer {
 /* لتنسيق الأزرار المخصصة */
 .custom-submit-btn {
     background: linear-gradient(to right, #ff7700, #00bfff); /* تدرج لوني */
-    color: white; /* لون النص */
+    color: rgb(255, 255, 255); /* لون النص */
     font-size: 16px; /* حجم النص */
     padding: 10px 20px; /* حشو داخلي */
     border: none; /* إزالة الحدود */
@@ -173,9 +273,34 @@ footer {
     transform: scale(1.05); /* تكبير بسيط */
     background: linear-gradient(to right, #ff6600, #0099cc); /* تدرج لوني جديد */
 }
+/* لتنسيق زر "إنشاء طلب الآن" */
+.custom-btn {
+    background: linear-gradient(to right, #15c3fd, #ff7700); /* تدرج لوني */
+    color: white; /* لون النص */
+    font-size: 18px; /* حجم النص */
+    padding: 12px 24px; /* حشو داخلي */
+    border: none; /* إزالة الحدود */
+    border-radius: 10px; /* زوايا مستديرة */
+    cursor: pointer; /* تغيير شكل المؤشر عند المرور على الزر */
+    transition: all 0.3s ease; /* تأثير الانتقال */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* إضافة تأثير الشادو */
+    text-align: center; /* توسيط النص */
+}
 
+/* تأثير عند المرور بالماوس على الزر */
+.custom-btn:hover {
+    transform: scale(1.05); /* تكبير الزر عند المرور عليه */
+    background: linear-gradient(to right, #ff6600, #0099cc); /* تدرج لوني جديد عند المرور */
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2); /* زيادة الشادو */
+}
+
+/* تأثير التركيز على الزر */
+.custom-btn:focus {
+    outline: none; /* إزالة الحدود الافتراضية */
+    box-shadow: 0px 0px 15px rgba(0, 123, 255, 0.7); /* إضافة تأثير شادو عند التركيز */
+}
 /* لتنسيق حاويات التسجيل وتسجيل الدخول */
-.register-container, .login-container {
+.login-container {
     display: flex; /* استخدام Flexbox */
     justify-content: center; /* توسيط أفقي */
     align-items: center; /* توسيط عمودي */
@@ -184,7 +309,7 @@ footer {
 }
 
 /* لتنسيق صناديق التسجيل وتسجيل الدخول */
-.register-box, .login-box {
+.login-box {
     background: linear-gradient(to right, #36b0e0, #ff7700); /* تدرج لوني */
     padding: 30px; /* حشو داخلي */
     border-radius: 10px; /* زوايا مستديرة */
@@ -194,14 +319,14 @@ footer {
 }
 
 /* لتنسيق العناوين داخل صناديق التسجيل */
-.register-box h2, .login-box h2 {
+.login-box h2 {
     margin-bottom: 10px; /* مسافة سفلية */
     font-size: 24px; /* حجم النص */
     color: #fff; /* لون النص */
 }
 
 /* لتنسيق المدخلات */
-.register-box .form-group input, .login-box .input-group input {
+.form-group input, .login-box .input-group input {
     width: 100%; /* عرض كامل */
     padding: 10px; /* حشو داخلي */
     font-size: 14px; /* حجم النص */
@@ -211,7 +336,7 @@ footer {
 }
 
 /* تأثير التركيز على المدخلات */
-.register-box .form-group input:focus, .login-box .input-group input:focus {
+.form-group input:focus, .login-box .input-group input:focus {
     border-color: #007bff; /* تغيير لون الحدود */
     background-color: #f0f8ff; /* تغيير لون الخلفية */
 }
@@ -271,4 +396,17 @@ button.btn:hover {
 /* تأثير hover على الاقتراحات */
 #suggestions .list-group-item:hover {
     background-color: #f0f0f0; /* تغيير لون الخلفية */
+}
+
+/* تصغير الشعار في صفحة التسجيل */
+/* لتصغير الشعار في صفحة تسجيل الدخول */
+.login-logo {
+    width: 80px; /* تحديد عرض الشعار */
+    height: auto; /* الحفاظ على النسبة الأصلية للشعار */
+    margin-bottom: 20px; /* إضافة مسافة أسفل الشعار */
+}
+
+/* التأكد من تناسق العنصرين داخل صفحة التسجيل */
+.login-box {
+    padding: 30px 20px; /* تعديل الحشو الداخلي */
 }

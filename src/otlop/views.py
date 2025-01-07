@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.utils.dateparse import parse_date
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponse, Http404
 import openpyxl
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -11,16 +11,21 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import arabic_reshaper
 from bidi.algorithm import get_display
+import arabic_reshaper
+
 import os
+from pdf2image import convert_from_path
+
 
 # استيراد النماذج
-from .models import Order, DeliveryPerson, Payment
+from .models import Order, DeliveryPerson, Payment, Employee, EmployeeAction
+from .forms import EmployeeActionForm  # استيراد النموذج من forms.py
 
 # استيراد النماذج والحقول المخصصة
 from .forms import OrderForm, CustomUserCreationForm
 
 # استيراد الأدوات الخاصة بالاستعلامات وحساب الإجماليات
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, F
 from django.db import models
 
 # استيراد أدوات التعامل مع الأرقام العشرية
@@ -101,24 +106,19 @@ def dashboard(request):
 
 # عرض الطلبات السابقة
 def previous_orders(request):
-    """
-    عرض قائمة بجميع الطلبات السابقة مع إمكانية تصفيتها حسب التواريخ.
-    """
+    # الحصول على تواريخ البحث من الطلب
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    orders = Order.objects.all().order_by('-created_at')  # عرض الطلبات مرتبة تنازليًا حسب تاريخ الإنشاء
-    if start_date:
-        start_date = parse_date(start_date)
-        orders = orders.filter(created_at__date__gte=start_date)  # تصفية الطلبات بتاريخ بدء أكبر
-    if end_date:
-        end_date = parse_date(end_date)
-        orders = orders.filter(created_at__date__lte=end_date)  # تصفية الطلبات بتاريخ انتهاء أصغر
+    # تصفية الطلبات بناءً على التاريخ إذا تم إدخال تواريخ
+    orders = Order.objects.all()
+    if start_date and end_date:
+        orders = orders.filter(created_at__range=[start_date, end_date])
 
     context = {
         'orders': orders,
-        'start_date': start_date,
-        'end_date': end_date,
+        'start_date': start_date,  # تمرير تاريخ البداية إلى القالب
+        'end_date': end_date,      # تمرير تاريخ النهاية إلى القالب
     }
     return render(request, 'otlop/previous-orders.html', context)
 # دالة لتعيين السائق لطلب معين
@@ -249,15 +249,30 @@ def drivers_list(request):
 
     # حساب المبالغ المستحقة للسائقين
     for driver in drivers:
-        driver.due_amount = driver.calculate_due_amount()  # استدعاء دالة لحساب المبالغ المستحقة
-        driver.total_orders = driver.orders.count()  # حساب عدد الطلبات لكل سائق
+        # حساب الطلبات المرتبطة بالسائق
+        driver_orders = driver.orders.filter(delivery_status='Delivered')
+
+        # حساب إجمالي الإيرادات للسائق
+        driver_revenue = driver_orders.aggregate(Sum('delivery_price'))['delivery_price__sum'] or 0
+
+        # حساب إجمالي المدفوعات للسائق
+        driver_paid = driver.payment_set.aggregate(Sum('amount'))['amount__sum'] or 0
+
+        # حساب نسبة الشركة من الإيرادات
+        company_due_amount = (driver_revenue * (100 - driver.percentage)) / 100
+
+        # خصم المدفوع من المبالغ المستحقة
+        due_amount = company_due_amount - driver_paid
+
+        # تعيين القيم المحسوبة للسائق
+        driver.due_amount = due_amount if due_amount > 0 else 0  # التأكد من أن المبلغ المستحق ليس سالبًا
+        driver.total_orders = driver_orders.count()  # حساب عدد الطلبات لكل سائق
 
     context = {
         'drivers': drivers,
         'query': query,  # إعادة نص البحث إلى القالب
     }
     return render(request, 'otlop/drivers_list.html', context)
-
 
 # إضافة سائق جديد
 def add_driver(request):
@@ -307,40 +322,49 @@ def add_driver(request):
 
     return render(request, 'otlop/add-driver.html')
 
+
 def driver_details(request, driver_id):
+    """
+    عرض تفاصيل سائق معين مع حساب المبالغ المستحقة بنفس منطق DriverList.
+    """
     driver = get_object_or_404(DeliveryPerson, id=driver_id)
     
-    # استرجاع جميع الطلبات المرتبطة بالسائق
-    orders = driver.orders.all()
-    
-    # إجمالي الإيرادات (التوصيل)
-    total_earnings = orders.aggregate(Sum('delivery_price'))['delivery_price__sum'] or 0
-    
-    # إجمالي المدفوعات
-    payments = Payment.objects.filter(driver=driver)
-    total_payments = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+    # الطلبات المرتبطة بالسائق
+    driver_orders = driver.orders.filter(delivery_status='Delivered')
 
-    # حساب أرباح السائق بناءً على نسبة السائق
-    driver_profit = total_earnings * driver.percentage / 100
+    # إجمالي الإيرادات للسائق
+    driver_revenue = driver_orders.aggregate(Sum('delivery_price'))['delivery_price__sum'] or 0
 
-    # حساب عدد الطلبات الموصلة
-    delivered_orders_count = orders.filter(delivery_status='Delivered').count()
+    # إجمالي المدفوعات للسائق
+    driver_paid = Payment.objects.filter(driver=driver).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # حساب إجمالي الطلبات الملغاة (لإضافة لمسة إضافية)
-    cancelled_orders_count = orders.filter(delivery_status='Cancelled').count()
+    # حساب نسبة الشركة من الإيرادات
+    company_due_amount = (driver_revenue * (100 - driver.percentage)) / 100
 
-    # إرسال البيانات إلى القالب
+    # خصم المدفوع من المبالغ المستحقة
+    due_amount = company_due_amount - driver_paid
+
+    # التأكد من أن المبلغ المستحق ليس سالبًا
+    due_amount = due_amount if due_amount > 0 else 0
+
+    # حساب عدد الطلبات الموصلة والملغاة
+    delivered_orders_count = driver_orders.count()
+    cancelled_orders_count = driver.orders.filter(delivery_status='Cancelled').count()
+
     context = {
         'driver': driver,
-        'orders': orders,
-        'total_earnings': total_earnings,
-        'payments': payments,
-        'total_payments': total_payments,
-        'driver_profit': driver_profit,  # إضافة أرباح السائق
-        'delivered_orders_count': delivered_orders_count,  # عدد الطلبات الموصلة
-        'cancelled_orders_count': cancelled_orders_count,  # عدد الطلبات الملغاة
+        'orders': driver_orders,
+        'total_earnings': driver_revenue,
+        'payments': Payment.objects.filter(driver=driver),
+        'total_payments': driver_paid,
+        'driver_profit': driver_revenue * driver.percentage / 100,  # أرباح السائق
+        'delivered_orders_count': delivered_orders_count,
+        'cancelled_orders_count': cancelled_orders_count,
+        'due_amount': due_amount,  # المبالغ المستحقة للشركة
     }
+
     return render(request, 'otlop/driver-details.html', context)
+
 def export_driver_details_to_excel(request, driver_id):
     # احصل على تفاصيل السائق والطلبات
     driver = get_object_or_404(DeliveryPerson, id=driver_id)
@@ -361,8 +385,8 @@ def export_driver_details_to_excel(request, driver_id):
         driver.vehicle_type,
         orders.count(),
         sum(order.delivery_price or 0 for order in orders),
-        driver.total_paid,
-        driver.due_amount
+        sum(payment.amount or 0 for payment in driver.payment_set.all()),
+        sum(order.delivery_price or 0 for order in orders) - sum(payment.amount or 0 for payment in driver.payment_set.all())
     ])
     
     # إضافة تفاصيل الطلبات
@@ -385,68 +409,74 @@ def export_driver_details_to_excel(request, driver_id):
     
     workbook.save(response)
     return response
-def export_driver_to_pdf(request, driver_id):
+
+
+
+def export_driver_to_image(request, driver_id):
     # جلب تفاصيل السائق
     driver = get_object_or_404(DeliveryPerson, id=driver_id)
     orders = driver.orders.all()
     payments = Payment.objects.filter(driver=driver)
 
-    # إعداد استجابة PDF
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="driver_{driver_id}_details.pdf"'
+    # إجمالي الإيرادات والمدفوعات
+    total_earnings = orders.aggregate(Sum('delivery_price'))['delivery_price__sum'] or 0
+    total_payments = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+    driver_profit = total_earnings * driver.percentage / 100
+    due_amount = total_earnings - total_payments
+    delivered_orders_count = orders.filter(delivery_status='Delivered').count()
+    cancelled_orders_count = orders.filter(delivery_status='Cancelled').count()
 
     # تسجيل الخط
-    FONT_PATH = "/Users/ayoubbelhaj/Documents/projects/otlopdelivery/src/otlop/static/otlop/fonts/Tajawal-ExtraLight.ttf"
+    FONT_PATH = "/Users/ayoubbelhaj/Documents/projects/otlopdelivery/src/otlop/static/otlop/fonts/Tajawal-ExtraBold.ttf"
     pdfmetrics.registerFont(TTFont('Tajawal', FONT_PATH))
 
-    # إنشاء ملف PDF
-    pdf_canvas = canvas.Canvas(response, pagesize=letter)
+    # إنشاء ملف PDF مؤقت
+    pdf_path = "temp_driver_details.pdf"
+    pdf_canvas = canvas.Canvas(pdf_path, pagesize=letter)
     pdf_canvas.setFont("Tajawal", 14)
 
-    # كتابة تفاصيل السائق
+    # كتابة البيانات على PDF
     y_position = 750
     pdf_canvas.drawString(50, y_position, process_arabic_text(f"تفاصيل السائق: {driver.name}"))
     y_position -= 20
     pdf_canvas.drawString(50, y_position, process_arabic_text(f"رقم الهاتف: {driver.phone_number}"))
     y_position -= 20
     pdf_canvas.drawString(50, y_position, process_arabic_text(f"نوع المركبة: {driver.vehicle_type}"))
+    y_position -= 20
+    pdf_canvas.drawString(50, y_position, process_arabic_text(f"إجمالي العوائد: {total_earnings:.2f} دينار"))
+    y_position -= 20
+    pdf_canvas.drawString(50, y_position, process_arabic_text(f"إجمالي المدفوعات: {total_payments:.2f} دينار"))
+    y_position -= 20
+    pdf_canvas.drawString(50, y_position, process_arabic_text(f"صافي ربح السائق: {driver_profit:.2f} دينار"))
+    y_position -= 20
+    pdf_canvas.drawString(50, y_position, process_arabic_text(f"عدد الطلبات الموصلة: {delivered_orders_count}"))
+    y_position -= 20
+    pdf_canvas.drawString(50, y_position, process_arabic_text(f"عدد الطلبات الملغاة: {cancelled_orders_count}"))
+    y_position -= 20
+    pdf_canvas.drawString(50, y_position, process_arabic_text(f"المبالغ المستحقة: {due_amount:.2f} دينار"))
     y_position -= 40
 
-    # كتابة تفاصيل الطلبات
-    pdf_canvas.drawString(50, y_position, process_arabic_text("الطلبات:"))
-    y_position -= 20
-
-    if orders.exists():
-        for idx, order in enumerate(orders, start=1):
-            order_details = f"{idx}. {order.order_details} - {order.delivery_price or 'غير محدد'} دينار"
-            pdf_canvas.drawString(50, y_position, process_arabic_text(order_details))
-            y_position -= 20
-            if y_position < 50:  # إذا انتهت الصفحة
-                pdf_canvas.showPage()
-                pdf_canvas.setFont("Tajawal", 14)
-                y_position = 750
-    else:
-        pdf_canvas.drawString(50, y_position, process_arabic_text("لا توجد طلبات مسجلة لهذا السائق."))
-
-    y_position -= 40
-    pdf_canvas.drawString(50, y_position, process_arabic_text("المدفوعات:"))
-    y_position -= 20
-
-    if payments.exists():
-        for idx, payment in enumerate(payments, start=1):
-            payment_details = f"{idx}. {payment.amount} دينار - {payment.payment_method or 'غير محدد'}"
-            pdf_canvas.drawString(50, y_position, process_arabic_text(payment_details))
-            y_position -= 20
-            if y_position < 50:  # إذا انتهت الصفحة
-                pdf_canvas.showPage()
-                pdf_canvas.setFont("Tajawal", 14)
-                y_position = 750
-    else:
-        pdf_canvas.drawString(50, y_position, process_arabic_text("لا توجد مدفوعات مسجلة لهذا السائق."))
-
-    # حفظ ملف PDF
+    # إنهاء PDF
     pdf_canvas.save()
+
+    # تحويل PDF إلى صورة
+    images = convert_from_path(pdf_path)
+    image_path = "driver_details_image.png"
+    images[0].save(image_path, "PNG")
+
+    # حذف ملف PDF المؤقت
+    os.remove(pdf_path)
+
+    # إعداد استجابة الصورة
+    with open(image_path, "rb") as img_file:
+        response = HttpResponse(img_file.read(), content_type="image/png")
+        response["Content-Disposition"] = f"attachment; filename=driver_{driver_id}_details.png"
+
+    # حذف ملف الصورة المؤقت
+    os.remove(image_path)
+
     return response
+
 def process_arabic_text(text):
     """
     معالجة النصوص العربية لتظهر بشكل صحيح في PDF.
@@ -532,7 +562,7 @@ def order_details(request, order_id):
     context = {
         'order': order,
         'partial_details': f"من {order.restaurant_area} إلى {order.customer_area} - سعر التوصيل ({order.delivery_price or 'غير محدد'} دينار) - سعر الطلبية: ({order.order_price or 'غير محدد'} دينار).",
-        'full_details': f"تفاصيل كاملة: إلى الزبون {order.customer_name}, الطلب من {order.restaurant_area} إلى {order.customer_area} بسعر توصيل {order.delivery_price or 'غير محدد'} دينار."
+        'full_details': f"تفاصيل كاملة: إلى  {order.customer_name}, الطلب من {order.restaurant_name} إلى {order.customer_area} بسعر توصيل {order.delivery_price or 'غير محدد'} دينار.   سعر الطلبية  {order.order_price or 'غير محدد'}   {order.notes or 'مستعجله '}"
     }
     return render(request, 'otlop/order_details.html', context)
 def global_search(request):
@@ -564,10 +594,14 @@ def global_search(request):
     }
     return render(request, 'otlop/global_search.html', context)
 # طلب جديد
+
 def new_order(request):
     """
     إضافة طلب جديد مع تعيين سائق افتراضي (None)، مع إمكانية تعديله لاحقًا.
     """
+    partial_details = ''
+    full_details = ''
+    
     if request.method == 'POST':
         # استلام بيانات الطلب من الفورم
         customer_name = request.POST.get('customer_name')
@@ -594,8 +628,13 @@ def new_order(request):
             order_price=order_price,
             notes=notes,
             delivery_person=delivery_person,  # سائق غير محدد
-            order_details=f"من {restaurant_name} إلى {customer_area} بسعر {order_price or 'غير محدد'}"
+            order_details=f"من {restaurant_name} إلى {customer_area} بسعر {delivery_price or 'غير محدد'}"
         )
+
+        # توليد التفاصيل الجزئية والتفاصيل الكاملة
+        partial_details = f"من {restaurant_name} إلى {customer_area} بسعر {delivery_price or 'غير محدد'}"
+        full_details = f"الزبون: {customer_name}, منطقة الزبون: {customer_area}, المطعم: {restaurant_name}, منطقة المطعم: {restaurant_area}, " \
+                       f"سعر التوصيل: {delivery_price or 'غير محدد'}, سعر الطلبية: {order_price or 'غير محدد'}, ملاحظات: {notes or 'لا توجد ملاحظات'}"
 
         # عرض رسالة تأكيد
         messages.success(request, 'تم إرسال الطلب بنجاح!')
@@ -608,12 +647,8 @@ def new_order(request):
     context = {
         'drivers': drivers,
         'pending_orders': pending_orders,
-    }
-
-    return render(request, 'otlop/new-order.html', context)
-    context = {
-        'drivers': drivers,
-        'pending_orders': pending_orders,
+        'partial_details': partial_details,
+        'full_details': full_details,
     }
 
     return render(request, 'otlop/new-order.html', context)
@@ -637,7 +672,6 @@ def update_order_status(request, order_id, status):
     order.save()
 
     return redirect('dashboard')
-
 # عرض حسابات السائقين
 def driver_accounts(request):
     """
@@ -666,12 +700,10 @@ def driver_accounts(request):
     total_paid = 0
     total_orders_count = 0
     total_net_profit = 0
-    total_percentage = 0
-    total_company_percentage = 0
 
     for driver in drivers:
         # حساب الطلبات المرتبطة بالسائق
-        driver_orders = orders.filter(delivery_person=driver)
+        driver_orders = orders.filter(delivery_person=driver, delivery_status='Delivered')
 
         # حساب إجمالي الإيرادات للسائق
         driver_revenue = driver_orders.aggregate(Sum('delivery_price'))['delivery_price__sum'] or 0
@@ -679,14 +711,12 @@ def driver_accounts(request):
         # حساب إجمالي المدفوعات للسائق
         driver_paid = driver.payment_set.aggregate(Sum('amount'))['amount__sum'] or 0
 
-        # حساب الرصيد المستحق للسائق
-        due_amount = driver_revenue - driver_paid
+        # حساب الرصيد المستحق من السائق للشركة
+        company_share = (driver_revenue * (100 - driver.percentage)) / 100
+        due_amount = company_share - driver_paid  # المبلغ الذي يدين به السائق للشركة
 
         # حساب صافي الربح من السائق
-        driver_net_profit = (driver_revenue * (100 - driver.percentage)) / 100
-
-        # حساب نسبة الشركة
-        company_percentage = 100 - driver.percentage
+        driver_net_profit = company_share
 
         # تجميع البيانات في قائمة السائقين
         driver_data.append({
@@ -696,7 +726,7 @@ def driver_accounts(request):
             'total_paid': driver_paid,
             'due_amount': due_amount,
             'percentage': driver.percentage,
-            'company_percentage': company_percentage,
+            'company_percentage': 100 - driver.percentage,
             'net_profit': driver_net_profit,
         })
 
@@ -706,12 +736,11 @@ def driver_accounts(request):
         total_paid += driver_paid
         total_orders_count += driver_orders.count()
         total_net_profit += driver_net_profit
-        total_percentage += driver.percentage
-        total_company_percentage += company_percentage
 
-    # حساب متوسط النسب
-    average_percentage = total_percentage / len(drivers) if drivers else 0
-    average_company_percentage = total_company_percentage / len(drivers) if drivers else 0
+    # حساب نسبة الشركة الإجمالية إذا كان هناك سائقون
+    total_company_percentage = (
+        100 - (sum([driver['percentage'] for driver in driver_data]) / len(driver_data))
+    ) if driver_data else 0
 
     context = {
         'driver_data': driver_data,
@@ -720,13 +749,13 @@ def driver_accounts(request):
         'total_paid': total_paid,
         'total_orders_count': total_orders_count,
         'total_net_profit': total_net_profit,
-        'average_percentage': average_percentage,
-        'total_company_percentage': average_company_percentage,  # إرسال نسبة الشركة الإجمالية
+        'total_company_percentage': total_company_percentage,
         'start_date': start_date,
         'end_date': end_date,
     }
 
     return render(request, 'otlop/driver_accounts.html', context)
+
 def edit_driver(request, driver_id):
     """
     تعديل بيانات السائق
@@ -790,7 +819,7 @@ def register(request):
 def login_view(request):
     """
     تسجيل الدخول للمستخدم.
-    """
+    """ 
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -810,7 +839,6 @@ def login_view(request):
         form = AuthenticationForm()
 
     return render(request, 'otlop/login.html', {'form': form})
-
 # دالة إنشاء الحساب
 def register_view(request):
     """
@@ -829,3 +857,165 @@ def register_view(request):
         form = UserCreationForm()
 
     return render(request, 'otlop/register.html', {'form': form})
+# ملف views.py
+def add_employee(request):
+    if request.method == 'POST':
+        # عملية إضافة الموظف
+        name = request.POST['employee_name']
+        position = request.POST['employee_position']
+        salary = request.POST['employee_salary']
+        phone = request.POST['employee_phone']
+
+        # إنشاء الموظف
+        employee = Employee.objects.create(
+            name=name, 
+            position=position, 
+            salary=salary, 
+            phone=phone
+        )
+        # التوجيه إلى قائمة الموظفين
+        return redirect('employee_list')
+    
+    return render(request, 'otlop/add_employee.html')
+
+def employee_list(request):
+    employees = Employee.objects.all()
+    for employee in employees:
+        employee.salary_after_penalty = employee.calculate_salary_after_penalty()
+    return render(request, 'otlop/employee_list.html', {'employees': employees})
+
+def calculate_salary_after_penalty(self):
+    # حساب الراتب بعد خصم التأخير أو السلفة أو الخصم العام
+    return self.salary - self.calculate_penalty() - self.loan_taken - self.discount_amount
+def edit_employee(request, id):
+    employee = get_object_or_404(Employee, pk=id)
+
+    if request.method == 'POST':
+        employee.name = request.POST['employee_name']
+        employee.position = request.POST['employee_position']
+        employee.salary = request.POST['employee_salary']
+        employee.phone = request.POST['employee_phone']
+        employee.save()
+        return redirect('employee_list')
+
+    return render(request, 'otlop/edit_employee.html', {'employee': employee})
+
+def delete_employee(request, id):
+    employee = get_object_or_404(Employee, pk=id)
+    
+    if request.method == 'POST':
+        employee.delete()
+        return redirect('employee_list')
+    
+    return render(request, 'otlop/confirm_delete.html', {'employee': employee})
+
+# عرض تفاصيل الموظف
+def employee_detail(request, id):
+    employee = get_object_or_404(Employee, pk=id)
+    return render(request, 'otlop/employee_detail.html', {'employee': employee})
+
+
+# دالة لإضافة إجراء مثل الخصم أو السلفة أو الدقائق المتأخرة
+
+
+
+def add_employee_action(request, employee_id):
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    if request.method == 'POST':
+        # اجلب القيم من POST كـ string، واحرص على معالجة الفراغات
+        discount_str = request.POST.get('discount_amount', '').strip()
+        penalty_reason = request.POST.get('penalty_reason', '').strip()
+        late_minutes_str = request.POST.get('late_minutes', '').strip()
+        loan_str = request.POST.get('loan_taken', '').strip()
+
+        # حوّل discount_amount إلى Decimal، وإذا كانت فارغة أو غير صالحة -> صفر
+        try:
+            discount_amount = Decimal(discount_str) if discount_str else Decimal('0')
+        except InvalidOperation:
+            discount_amount = Decimal('0')
+
+        # حوّل loan_taken إلى Decimal، وإذا كانت فارغة أو غير صالحة -> صفر
+        try:
+            loan_taken = Decimal(loan_str) if loan_str else Decimal('0')
+        except InvalidOperation:
+            loan_taken = Decimal('0')
+
+        # حوّل late_minutes إلى int، وإذا كانت فارغة أو غير صالحة -> صفر
+        try:
+            late_minutes = int(late_minutes_str) if late_minutes_str else 0
+        except ValueError:
+            late_minutes = 0
+
+        # طبّق التحديثات على الموظف
+        employee.late_minutes += late_minutes
+        employee.loan_taken += loan_taken
+        employee.penalty_reason = penalty_reason
+
+        # إذا كان discount_amount أكبر من صفر، اطرح من salary
+        employee.salary -= discount_amount
+
+        # إعادة حساب الراتب بعد العقوبة/السلفة/الخصم
+        employee.calculate_salary_after_penalty()
+        employee.save()
+        
+        messages.success(request, 'تم تحديث بيانات الموظف بنجاح.')
+        return redirect('employee_list')
+    
+    # إذا لم يكن الطلب POST فعُد إلى نفس الصفحة أو أي صفحة أخرى
+    return render(request, 'otlop/employee_list.html', {"employee": employee})
+def add_employee_discount(request, employee_id):
+    employee = get_object_or_404(Employee, pk=employee_id)
+    
+    if request.method == 'POST':
+        # الحصول على قيمة الخصم من النموذج
+        discount_amount = float(request.POST.get('discount_amount', 0))
+        penalty_reason = request.POST.get('penalty_reason', '')
+        
+        # تحديث المبلغ الذي سيتم خصمه
+        employee.discount_amount += discount_amount
+        employee.penalty_reason = penalty_reason
+        
+        # حساب الراتب بعد الخصم
+        employee.salary_after_penalty = employee.calculate_salary_after_penalty()
+        
+        employee.save()  # حفظ التحديثات
+
+        return redirect('employee_list')  # العودة إلى صفحة قائمة الموظفين
+
+    return HttpResponse("فشل إضافة الخصم", status=400)
+
+def edit_action(request, action_id):
+    # الحصول على الإجراء المطلوب أو إرجاع 404 إذا لم يتم العثور عليه
+    action = get_object_or_404(EmployeeAction, id=action_id)
+    
+    if request.method == 'POST':
+        # إذا كانت الطريقة POST، قم بإنشاء نموذج مع البيانات المقدمة
+        form = EmployeeActionForm(request.POST, instance=action)
+        if form.is_valid():
+            # حفظ النموذج إذا كان صالحًا
+            form.save()
+            # تحديث راتب الموظف بعد التعديل
+            action.employee.calculate_salary_after_penalty()
+            # إعادة التوجيه إلى صفحة تفاصيل الموظف
+            return redirect('employee_detail', employee_id=action.employee.id)
+    else:
+        # إذا كانت الطريقة GET، قم بإنشاء نموذج مع بيانات الإجراء الحالي
+        form = EmployeeActionForm(instance=action)
+    
+    # عرض صفحة التعديل مع النموذج والإجراء
+    return render(request, 'otlop/edit_action.html', {'form': form, 'action': action})
+
+def delete_action(request, action_id):
+    # الحصول على الإجراء المطلوب أو إرجاع 404 إذا لم يتم العثور عليه
+    action = get_object_or_404(EmployeeAction, id=action_id)
+    employee_id = action.employee.id
+    
+    # حذف الإجراء
+    action.delete()
+    
+    # تحديث راتب الموظف بعد الحذف
+    action.employee.calculate_salary_after_penalty()
+    
+    # إعادة التوجيه إلى صفحة تفاصيل الموظف
+    return redirect('employee_detail', id=employee_id)

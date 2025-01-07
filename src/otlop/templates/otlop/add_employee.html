@@ -1,0 +1,26 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+<h2>إضافة موظف جديد</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="employee_name">اسم الموظف:</label>
+        <input type="text" name="employee_name" id="employee_name" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="employee_position">الوظيفة:</label>
+        <input type="text" name="employee_position" id="employee_position" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="employee_salary">الراتب:</label>
+        <input type="number" name="employee_salary" id="employee_salary" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="employee_phone">رقم الهاتف:</label>
+        <input type="text" name="employee_phone" id="employee_phone" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">إضافة الموظف</button>
+</form>
+{% endblock %}

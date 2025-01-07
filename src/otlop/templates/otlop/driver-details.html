@@ -2,64 +2,88 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- عنوان الصفحة وأزرار التحكم -->
-    <div class="d-flex justify-content-between mb-3">
-        <h2 class="mb-4">قائمة السائقين</h2>
-        <a href="{% url 'add_driver' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> إضافة سائق جديد
+    <!-- عنوان الصفحة -->
+    <h2 class="mb-4">تفاصيل السائق: {{ driver.name }}</h2>
+    <p><strong>رقم الهاتف:</strong> {{ driver.phone_number }}</p>
+    <p><strong>نوع المركبة:</strong> {{ driver.vehicle_type }}</p>
+    <p><strong>إجمالي العوائد:</strong> {{ total_earnings|floatformat:2 }} دينار</p>
+    <p><strong>إجمالي المدفوعات:</strong> {{ total_payments|floatformat:2 }} دينار</p>
+    <p><strong>صافي ربح السائق:</strong> {{ driver_profit|floatformat:2 }} دينار</p>
+    <p><strong>عدد الطلبات الموصلة:</strong> {{ delivered_orders_count }}</p>
+    <p><strong>عدد الطلبات الملغاة:</strong> {{ cancelled_orders_count }}</p>
+    <p><strong>المبالغ المستحقة:</strong> 
+        {% if difference > 0 %}
+            <span class="badge badge-warning" title="هناك مبالغ مستحقة لم تُدفع بعد">{{ difference|floatformat:2 }} دينار</span>
+        {% elif difference == 0 %}
+            <span class="badge badge-success" title="تم تسوية جميع المبالغ">مدفوع بالكامل</span>
+        {% else %}
+            <span class="badge badge-danger" title="هناك مبالغ مدينة">مدين</span>
+        {% endif %}
+    </p>
+
+    <!-- أزرار تصدير -->
+    <div class="mt-4">
+        <a href="{% url 'export_driver_to_excel' driver.id %}" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+        </a>
+        <a href="{% url 'export_driver_to_pdf' driver.id %}" class="btn btn-danger">
+            <i class="fas fa-file-pdf"></i> تصدير إلى PDF
         </a>
     </div>
 
-    <!-- نموذج البحث -->
-    <form method="get" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="ابحث باسم السائق أو رقم الهاتف" value="{{ query }}">
-            <button class="btn btn-primary" type="submit">بحث</button>
-        </div>
-    </form>
-
-    <!-- جدول عرض السائقين -->
-    <table class="table table-striped">
+    <!-- جدول الطلبات -->
+    <h3 class="mt-5">الطلبات</h3>
+    <table class="table table-striped table-bordered">
         <thead class="table-dark">
             <tr>
-                <th>اسم السائق</th>
-                <th>عدد الطلبات</th>
-                <th>إجمالي العوائد</th>
-                <th>إجمالي المدفوعات</th>
-                <th>المبالغ المستحقة</th>
-                <th>الحالة المالية</th>
-                <th>إجراءات</th>
+                <th>#</th>
+                <th>تفاصيل الطلب</th>
+                <th>سعر التوصيل</th>
+                <th>حالة الطلب</th>
+                <th>تاريخ الطلب</th>
             </tr>
         </thead>
         <tbody>
-            {% for driver in drivers %}
+            {% for order in orders %}
             <tr>
-                <td>{{ driver.name }}</td>
-                <td>{{ driver.total_orders }}</td>
-                <td>{{ driver.total_revenue }} دينار</td>
-                <td>{{ driver.total_paid }} دينار</td>
-                <td>{{ driver.due_amount }} دينار</td>
-                <td>
-                    {% if driver.due_amount > 0 %}
-                        <span class="badge badge-warning">مدفوع جزئيًا</span>
-                    {% elif driver.due_amount == 0 %}
-                        <span class="badge badge-success">مدفوع بالكامل</span>
-                    {% else %}
-                        <span class="badge badge-danger">مدين</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'record_payment' driver.id %}" class="btn btn-primary btn-sm">تسجيل دفعة</a>
-                    <a href="{% url 'edit_driver' driver.id %}" class="btn btn-warning btn-sm">تعديل</a>
-                    <a href="{% url 'delete_driver' driver.id %}" class="btn btn-danger btn-sm">حذف</a>
-                    <a href="{% url 'driver_details' driver.id %}" class="btn btn-info btn-sm">
-                        <i class="fas fa-info-circle"></i> تفاصيل
-                    </a>
-                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.order_details }}</td>
+                <td>{{ order.delivery_price|floatformat:2 }} دينار</td>
+                <td>{{ order.delivery_status }}</td>
+                <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center">لا توجد بيانات للسائقين.</td>
+                <td colspan="5" class="text-center">لا توجد طلبات لهذا السائق.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- جدول المدفوعات -->
+    <h3 class="mt-5">المدفوعات</h3>
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>المبلغ</th>
+                <th>طريقة الدفع</th>
+                <th>التاريخ</th>
+                <th>ملاحظات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ payment.amount|floatformat:2 }} دينار</td>
+                <td>{{ payment.payment_method }}</td>
+                <td>{{ payment.date|date:"Y-m-d H:i" }}</td>
+                <td>{{ payment.notes }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">لا توجد مدفوعات لهذا السائق.</td>
             </tr>
             {% endfor %}
         </tbody>

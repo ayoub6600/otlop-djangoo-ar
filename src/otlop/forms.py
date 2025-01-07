@@ -1,6 +1,8 @@
 from django import forms
 from .models import Order, DeliveryPerson
 from django.contrib.auth.models import User
+from .models import EmployeeAction
+
 
 class CustomUserCreationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
@@ -36,3 +38,8 @@ class OrderForm(forms.ModelForm):
 
     # حقل حالة الطلب (delivery_status) يمكن تخصيصه إذا لزم الأمر
     delivery_status = forms.ChoiceField(choices=Order.DELIVERY_STATUS_CHOICES, required=False, initial='Pending')
+    
+class EmployeeActionForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeAction
+        fields = ['action_type', 'late_minutes', 'penalty_amount', 'loan_taken', 'penalty_reason', 'loan_taken_date', 'discount_amount']

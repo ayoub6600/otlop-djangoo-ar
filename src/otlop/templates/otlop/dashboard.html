@@ -14,23 +14,24 @@
         <button type="submit" class="btn btn-primary">عرض البيانات</button>
     </form>
 
-    <!-- نموذج تحديد الجرد حسب التاريخ -->
-    <form method="get" class="mb-4">
-        <div class="form-row">
-            <div class="form-group col-md-5">
-                <label for="start_date">من تاريخ:</label>
-                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}">
-            </div>
-            <div class="form-group col-md-5">
-                <label for="end_date">إلى تاريخ:</label>
-                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}">
-            </div>
-            <div class="form-group col-md-2 align-self-end">
-                <button type="submit" class="btn btn-secondary">تصفية</button>
-            </div>
+<!-- نموذج تحديد الجرد حسب التاريخ -->
+<form method="get" class="mb-4">
+    <div class="form-row">
+        <div class="form-group col-md-5">
+            <label for="start_date">من تاريخ:</label>
+            <input type="date" name="start_date" id="start_date" class="form-control" 
+                   value="{{ start_date|default_if_none:''|date:'Y-m-d' }}">
         </div>
-    </form>
-
+        <div class="form-group col-md-5">
+            <label for="end_date">إلى تاريخ:</label>
+            <input type="date" name="end_date" id="end_date" class="form-control" 
+                   value="{{ end_date|default_if_none:''|date:'Y-m-d' }}">
+        </div>
+        <div class="form-group col-md-2 align-self-end">
+            <button type="submit" class="btn btn-secondary">تصفية</button>
+        </div>
+    </div>
+</form>
     <!-- الإحصائيات -->
     <div class="row text-center">
         <div class="col-md-3">

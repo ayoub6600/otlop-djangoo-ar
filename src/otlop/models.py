@@ -1,5 +1,8 @@
 from django.db import models
 from django.db.models import Sum
+from decimal import Decimal
+from django.contrib.auth.models import User
+
 
 # نموذج الطلب
 class Order(models.Model):
@@ -133,3 +136,72 @@ class User(models.Model):
 
     def __str__(self):
         return self.username
+
+
+class Employee(models.Model):
+    name = models.CharField(max_length=100)
+    position = models.CharField(max_length=100, null=True, blank=True)
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
+    late_minutes = models.IntegerField(default=0)
+    penalty_per_minute = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
+    loan_taken = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    salary_after_penalty = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    penalty_reason = models.TextField(blank=True, null=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def calculate_salary_after_penalty(self):
+        total_penalty = self.late_minutes * self.penalty_per_minute
+        total_loan = self.loan_taken
+        total_discount = self.discount_amount
+        
+        self.salary_after_penalty = (
+            self.salary
+            - total_penalty
+            - total_loan
+            - total_discount
+        )
+        self.save()
+        return self.salary_after_penalty
+
+    def __str__(self):
+        return self.name
+
+
+class EmployeeAction(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="actions")
+    action_type = models.CharField(max_length=100)
+    late_minutes = models.IntegerField(default=0)
+    penalty_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    loan_taken = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    penalty_reason = models.TextField(blank=True, null=True)
+    loan_taken_date = models.DateField(null=True, blank=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"Action for {self.employee.name} - {self.action_type}"
+
+    def delete(self, *args, **kwargs):
+        """
+        عند حذف الإجراء، تراجع تأثيره على الموظف:
+          - تقليل الدقائق المتأخرة
+          - تقليل الخصومات
+          - تقليل السلف (إن وجد)
+          - ثم إعادة حساب الراتب (salary_after_penalty)
+        """
+        # 1) تعديل قيم الموظف بإزالة التأثير الذي أحدثه هذا الإجراء
+        if self.late_minutes:
+            self.employee.late_minutes = max(self.employee.late_minutes - self.late_minutes, 0)
+
+        if self.loan_taken:
+            # ربما الموظف أخذ أكثر من سلفة، فتحتاج لمراعاة عدم نزولها عن الصفر
+            self.employee.loan_taken = max(self.employee.loan_taken - self.loan_taken, 0)
+
+        if self.discount_amount:
+            # إذا كان هناك خصومات على الموظف
+            self.employee.discount_amount = max(self.employee.discount_amount - self.discount_amount, 0)
+
+        # 2) إعادة احتساب راتب الموظف
+        self.employee.calculate_salary_after_penalty()
+        
+        # 3) بعد التعديلات على الموظف، استدعِ الدالة الأب لحذف السجل
+        super().delete(*args, **kwargs)

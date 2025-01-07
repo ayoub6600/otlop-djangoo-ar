@@ -1,0 +1,92 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+  <h2>إدارة الموظفين</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>اسم الموظف</th>
+        <th>المسمى الوظيفي</th>
+        <th>الراتب</th>
+        <th>الدقائق المتأخرة</th>
+        <th>الخصم لكل دقيقة</th>
+        <th>السلفة</th>
+        <th>الراتب بعد الخصم</th>
+        <th>سبب الخصم</th>
+        <th>الإجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for employee in employees %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ employee.name }}</td>
+          <td>{{ employee.position }}</td>
+          <td>{{ employee.salary }} دينار</td>
+          <td>{{ employee.late_minutes }} دقيقة</td>
+          <td>{{ employee.penalty_per_minute }} دينار</td>
+          <td>{{ employee.loan_taken }} دينار</td>
+          <td>{{ employee.salary_after_penalty }} دينار</td>
+          <td>{{ employee.penalty_reason }}</td>
+          <td>
+            <a href="{% url 'edit_employee' employee.id %}" class="btn btn-warning">تعديل</a>
+            <a href="{% url 'delete_employee' employee.id %}" class="btn btn-danger">حذف</a>
+            <a href="{% url 'employee_detail' employee.id %}" class="btn btn-info">تفاصيل</a>
+            <!-- زر لإضافة الخصم أو السلفة أو الدقائق المتأخرة -->
+            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#employeeActionModal{{ employee.id }}">إضافة إجراء</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="10" class="text-center">لا توجد موظفين بعد</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Modal لإضافة إجراء للموظف -->
+  {% for employee in employees %}
+    <div class="modal fade" id="employeeActionModal{{ employee.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">إضافة إجراء للموظف {{ employee.name }}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form method="POST" action="{% url 'add_employee_action' employee.id %}">
+            {% csrf_token %}
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="discount_amount">قيمة الخصم:</label>
+                <input type="number" name="discount_amount" class="form-control" id="discount_amount" placeholder="أدخل قيمة الخصم" step="0.01">
+              </div>
+              <div class="form-group">
+                <label for="penalty_reason">سبب الخصم:</label>
+                <textarea name="penalty_reason" class="form-control" id="penalty_reason" placeholder="سبب الخصم"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="late_minutes">عدد الدقائق المتأخرة:</label>
+                <input type="number" name="late_minutes" class="form-control" id="late_minutes" placeholder="أدخل عدد الدقائق المتأخرة">
+              </div>
+              <div class="form-group">
+                <label for="loan_taken">السلفة:</label>
+                <input type="number" name="loan_taken" class="form-control" id="loan_taken" placeholder="السلفة التي أخذها الموظف" step="0.01">
+              </div>
+              <div class="form-group">
+                <label for="loan_taken_date">تاريخ السلفة:</label>
+                <input type="date" name="loan_taken_date" class="form-control" id="loan_taken_date">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">إغلاق</button>
+              <button type="submit" class="btn btn-primary">إضافة</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock %}

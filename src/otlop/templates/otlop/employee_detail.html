@@ -1,0 +1,89 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+  <h2 class="my-4">تفاصيل الموظف: {{ employee.name }}</h2>
+
+  <!-- جدول تفاصيل الموظف -->
+  <div class="card mb-4">
+    <div class="card-header bg-info text-white">
+      <h4>معلومات الموظف</h4>
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered">
+        <tr>
+          <th>المسمى الوظيفي</th>
+          <td>{{ employee.position }}</td>
+        </tr>
+        <tr>
+          <th>الراتب الأصلي</th>
+          <td>{{ employee.salary }} دينار</td>
+        </tr>
+        <tr>
+          <th>عدد الدقائق المتأخرة</th>
+          <td>{{ employee.late_minutes }} دقيقة</td>
+        </tr>
+        <tr>
+          <th>قيمة السلفة</th>
+          <td>{{ employee.loan_taken }} دينار</td>
+        </tr>
+        <tr>
+          <th>تاريخ السلفة</th>
+          <td>{{ employee.loan_taken_date }}</td>
+        </tr>
+        <tr>
+          <th>الخصم على كل دقيقة تأخير</th>
+          <td>{{ employee.penalty_per_minute }} دينار</td>
+        </tr>
+        <tr>
+          <th>قيمة الخصم الإجمالية</th>
+          <td>{{ employee.calculate_penalty }} دينار</td>
+        </tr>
+        <tr>
+          <th>الخصم الإجمالي من السلفة</th>
+          <td>{{ employee.loan_taken }} دينار</td>
+        </tr>
+        <tr>
+          <th>الخصم الإجمالي</th>
+          <td>{{ employee.discount_amount }} دينار</td>
+        </tr>
+        <tr>
+          <th><strong>الراتب بعد الخصم</strong></th>
+          <td><strong>{{ employee.salary_after_penalty }} دينار</strong></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- عرض الإجراءات السابقة -->
+  <div class="card">
+    <div class="card-header bg-success text-white">
+      <h4>الإجراءات السابقة</h4>
+    </div>
+    <div class="card-body">
+      {% for action in employee.actions.all %}
+        <div class="alert alert-info">
+          <h5>نوع الإجراء: {{ action.action_type }}</h5>
+          <p><strong>الدقائق المتأخرة:</strong> {{ action.late_minutes }} دقيقة</p>
+          <p><strong>المبلغ المخصوم:</strong> {{ action.penalty_amount }} دينار</p>
+          <p><strong>السلفة:</strong> {{ action.loan_taken }} دينار</p>
+          <p><strong>سبب الخصم:</strong> {{ action.penalty_reason }}</p>
+          <p><strong>تاريخ السلفة:</strong> {{ action.loan_taken_date }}</p>
+          <p><strong>قيمة الخصم:</strong> {{ action.discount_amount }} دينار</p>
+          <!-- روابط التعديل والحذف -->
+          <div class="mt-2">
+            <a href="{% url 'edit_action' action.id %}" class="btn btn-warning btn-sm">تعديل</a>
+            <a href="{% url 'delete_action' action.id %}" class="btn btn-danger btn-sm">حذف</a>
+          </div>
+        </div>
+      {% empty %}
+        <p>لا توجد إجراءات لهذا الموظف.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="{% url 'employee_list' %}" class="btn btn-secondary">عودة إلى القائمة</a>
+  </div>
+
+{% endblock %}

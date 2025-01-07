@@ -1,0 +1,11 @@
+{% extends 'otlop/base.html' %}
+
+{% block content %}
+  <h2>هل أنت متأكد من أنك تريد حذف هذا الموظف؟</h2>
+  <p>الاسم: {{ employee.name }}</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">حذف</button>
+    <a href="{% url 'employee_list' %}" class="btn btn-secondary">إلغاء</a>
+  </form>
+{% endblock %}

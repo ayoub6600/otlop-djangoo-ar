@@ -1,7 +1,6 @@
 {% extends 'otlop/base.html' %}
 
 {% block content %}
-{% load static %}
 <div class="container mt-5">
     <!-- عرض الرسائل المنبثقة -->
     {% if messages %}
@@ -16,55 +15,55 @@
     {% endif %}
 
     <h2 class="text-center mb-4">إضافة طلب جديد</h2>
-    <form method="post">
+    <form method="post" id="orderForm">
         {% csrf_token %}
         
         <!-- اسم الزبون -->
         <div class="form-group">
             <label for="customer_name">اسم الزبون</label>
-            <input type="text" id="customer_name" name="customer_name" class="form-control" placeholder="أدخل اسم الزبون" required>
+            <input type="text" id="customer_name" name="customer_name" class="form-control" placeholder="أدخل اسم الزبون" required oninput="updateOrderDetails()">
         </div>
 
         <!-- منطقة الزبون -->
         <div class="form-group">
             <label for="customer_area">منطقة الزبون</label>
-            <input type="text" id="customer_area" name="customer_area" class="form-control" placeholder="أدخل منطقة الزبون" required>
+            <input type="text" id="customer_area" name="customer_area" class="form-control" placeholder="أدخل منطقة الزبون" required oninput="updateOrderDetails()">
         </div>
 
         <!-- اسم المطعم -->
         <div class="form-group">
             <label for="restaurant_name">اسم المطعم</label>
-            <input type="text" id="restaurant_name" name="restaurant_name" class="form-control" placeholder="أدخل اسم المطعم" required>
+            <input type="text" id="restaurant_name" name="restaurant_name" class="form-control" placeholder="أدخل اسم المطعم" required oninput="updateOrderDetails()">
         </div>
 
         <!-- منطقة المطعم -->
         <div class="form-group">
             <label for="restaurant_area">منطقة المطعم</label>
-            <input type="text" id="restaurant_area" name="restaurant_area" class="form-control" placeholder="أدخل منطقة المطعم" required>
+            <input type="text" id="restaurant_area" name="restaurant_area" class="form-control" placeholder="أدخل منطقة المطعم" required oninput="updateOrderDetails()">
         </div>
 
         <!-- تفاصيل الطلب (اختياري) -->
         <div class="form-group">
             <label for="order_details">تفاصيل الطلب (اختياري)</label>
-            <textarea id="order_details" name="order_details" class="form-control" rows="3" placeholder="أدخل تفاصيل الطلب"></textarea>
+            <textarea id="order_details" name="order_details" class="form-control" rows="3" placeholder="أدخل تفاصيل الطلب" oninput="updateOrderDetails()"></textarea>
         </div>
 
         <!-- سعر التوصيل -->
         <div class="form-group">
            <label for="delivery_price">سعر التوصيل (اختياري)</label>
-           <input type="number" id="delivery_price" name="delivery_price" class="form-control" placeholder="أدخل سعر التوصيل">
+           <input type="number" id="delivery_price" name="delivery_price" class="form-control" placeholder="أدخل سعر التوصيل" oninput="updateOrderDetails()">
        </div>
 
         <!-- سعر الطلبية -->
         <div class="form-group">
            <label for="order_price">سعر الطلبية (اختياري)</label>
-           <input type="number" id="order_price" name="order_price" class="form-control" placeholder="أدخل سعر الطلبية">
+           <input type="number" id="order_price" name="order_price" class="form-control" placeholder="أدخل سعر الطلبية" oninput="updateOrderDetails()">
        </div>  
 
         <!-- اختيار السائق -->
         <div class="form-group">
             <label for="delivery_person">اختيار السائق</label>
-            <select id="delivery_person" name="delivery_person" class="form-control">
+            <select id="delivery_person" name="delivery_person" class="form-control" oninput="updateOrderDetails()">
                 <option value="">اختر السائق</option>
                 {% for driver in drivers %}
                 <option value="{{ driver.id }}">{{ driver.name }}</option>
@@ -75,7 +74,7 @@
         <!-- ملاحظات إضافية -->
         <div class="form-group">
             <label for="notes">ملاحظات إضافية (اختياري)</label>
-            <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="أدخل أي ملاحظات إضافية"></textarea>
+            <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="أدخل أي ملاحظات إضافية" oninput="updateOrderDetails()"></textarea>
         </div>
 
         <!-- زر الإرسال -->
@@ -83,7 +82,70 @@
             <button type="submit" class="custom-submit-btn">إضافة الطلب</button>
         </div>
     </form>
+
+    <!-- عرض تفاصيل الطلب الجزئية -->
+    <div class="card shadow-sm p-4 mt-5 bg-light">
+        <h4 class="card-title text-primary">التفاصيل الجزئية</h4>
+        <p id="partial-details">{{ partial_details }}</p>
+        <button class="btn btn-secondary" onclick="copyToClipboard('partial-details')">نسخ التفاصيل الجزئية</button>
+    </div>
+
+    <!-- عرض تفاصيل الطلب الكاملة -->
+    <div class="card shadow-sm p-4 mt-3 bg-light">
+        <h4 class="card-title text-primary">التفاصيل الكاملة</h4>
+        <p id="full-details">{{ full_details }}</p>
+        <button class="btn btn-secondary" onclick="copyToClipboard('full-details')">نسخ التفاصيل الكاملة</button>
+    </div>
+
 </div>
+
+<!-- JavaScript لتحديث التفاصيل -->
+<script>
+    // دالة لتحديث التفاصيل الجزئية والكاملة أثناء الكتابة
+    function updateOrderDetails() {
+        var customer_name = document.getElementById("customer_name").value;
+        var customer_area = document.getElementById("customer_area").value;
+        var restaurant_name = document.getElementById("restaurant_name").value;
+        var restaurant_area = document.getElementById("restaurant_area").value;
+        var delivery_price = document.getElementById("delivery_price").value;
+        var order_price = document.getElementById("order_price").value;
+        var notes = document.getElementById("notes").value;
+        var delivery_person = document.getElementById("delivery_person").value;
+
+    // تحديث التفاصيل الجزئية
+    var partial_details = "من منطقة " + restaurant_area + " إلى منطقة " + customer_area + 
+                          " بسعر توصيل " + (delivery_price || "غير محدد") + " دينار" + 
+                          " وسعر الطلبية " + (order_price || "غير محدد") + " دينار";
+
+    
+    // إضافة الملاحظات في التفاصيل الجزئية، وإذا كانت فارغة، نعرض "مستعجلة"
+    if (notes) {
+        partial_details += " وملاحظات: " + notes;
+    } else {
+        partial_details += " وملاحظات: مستعجلة";
+    }
+    // تحديث النص في عنصر "partial-details"
+    document.getElementById("partial-details").textContent = partial_details;
+
+        // تحديث التفاصيل الكاملة
+        var full_details = "من  " + (restaurant_name || "غير محدد") + " إلى منطقة الزبون: " + (customer_area || "غير محدد")  +  ", سعر التوصيل: " + (delivery_price || "غير محدد") + 
+                   ", سعر الطلبية: " + (order_price || "غير محدد") + 
+                   ", ملاحظات: " + (notes || "  مستعجلة ولما تسلم الطلبيه ارسلي (تم التسليم)")  + (customer_name || "الرقم غير محدد  " )  ;
+        document.getElementById("full-details").textContent = full_details;
+    }
+
+    // دالة لنسخ النص إلى الحافظة
+    function copyToClipboard(elementId) {
+        var text = document.getElementById(elementId).innerText;
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        alert("تم نسخ النص إلى الحافظة!");
+    }
+</script>
 
 <h4 class="mt-5">الطلبات المعلقة</h4>
 <table class="table table-striped">
@@ -119,19 +181,4 @@
     </tbody>
 </table>
 
-<!-- JavaScript لإخفاء الرسائل -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            let alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                alert.style.transition = "opacity 1s ease";
-                alert.style.opacity = 0;
-                setTimeout(function() {
-                    alert.remove();
-                }, 1000); // إزالة العنصر بعد تأثير الإخفاء
-            });
-        }, 2000); // وقت الظهور قبل الاختفاء (2 ثانية)
-    });
-</script>
 {% endblock %}
