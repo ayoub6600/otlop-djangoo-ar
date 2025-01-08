@@ -142,6 +142,8 @@ class Employee(models.Model):
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=100, null=True, blank=True)
     salary = models.DecimalField(max_digits=10, decimal_places=2)
+    phone = models.CharField(max_length=15, default="غير محدد")  # تعيين قيمة افتراضية إذا كان الحقل فارغًا
+
     late_minutes = models.IntegerField(default=0)
     penalty_per_minute = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
     loan_taken = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
