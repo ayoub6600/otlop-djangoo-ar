@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from django.contrib.auth.views import LoginView as loginview
+from otlop import views
 urlpatterns = [
+    path('', loginview.as_view(template_name='otlop/login.html'), name='login'),
+    path('', views.home, name='home'),  # الصفحة الرئيسية بعد تسجيل الدخول
     path('admin/', admin.site.urls), 
     path('', include('otlop.urls')),
     ]

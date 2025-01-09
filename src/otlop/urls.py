@@ -1,10 +1,14 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.views import LoginView
+
 
 urlpatterns = [
     # صفحة تسجيل الدخول
-    path('login/', views.login_view, name='login'),  # صفحة تسجيل الدخول
+    path('', LoginView.as_view(template_name='login.html'), name='login'),
+    path('login/', views.login_view, name='login'),
+    path('home/', views.home, name='home'),
     path('register/', views.register, name='register'),  # صفحة التسجيل
 
     # الموظفين
@@ -19,7 +23,6 @@ urlpatterns = [
     path('delete-action/<int:action_id>/', views.delete_action, name='delete_action'),
 
     # بعد تسجيل الدخول يجب أن يتم إعادة التوجيه إلى الصفحة الرئيسية
-    path('', views.home, name='home'),  # الصفحة الرئيسية بعد تسجيل الدخول
     path('dashboard/', views.dashboard, name='dashboard'),  # لوحة التحكم
 
     # البحث

@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-
+LOGIN_URL = '/login/'  # أو اسم URL الخاص بصفحة تسجيل الدخول
+LOGIN_REDIRECT_URL = '/home/'  # الصفحة التي يتم تحويل المستخدم إليها بعد تسجيل الدخول
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -114,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Tripoli'
 
 USE_I18N = True
 

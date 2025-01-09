@@ -30,10 +30,14 @@ from django.db import models
 
 # استيراد أدوات التعامل مع الأرقام العشرية
 from decimal import Decimal, InvalidOperation
+from django.contrib.auth.decorators import login_required
+
+
 
 PASSWORD = "Ayoub@@1234"  # استبدل بكلمة المرور التي تريدها
 
 # الصفحة الرئيسية
+@login_required
 def home(request):
     """
     عرض الصفحة الرئيسية للموقع
@@ -41,6 +45,7 @@ def home(request):
     return render(request, 'otlop/index.html', {'title': 'Home'})
 
 # لوحة التحكم (Dashboard)
+@login_required
 def dashboard(request):
     """
     عرض لوحة التحكم التي تحتوي على إحصائيات الطلبات والعوائد والمزيد.
@@ -816,28 +821,24 @@ def register(request):
     return render(request, 'otlop/register.html', {'form': form})
 
 # دالة تسجيل الدخول
+
 def login_view(request):
-    """
-    تسجيل الدخول للمستخدم.
-    """ 
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
                 messages.success(request, "تم تسجيل الدخول بنجاح!")
-                return redirect('home')  # توجيه المستخدم إلى الصفحة الرئيسية بعد تسجيل الدخول
+                return redirect('home')  # Redirect to the 'home' named URL
             else:
                 messages.error(request, "اسم المستخدم أو كلمة المرور غير صحيحة.")
         else:
             messages.error(request, "يرجى إدخال بيانات صحيحة.")
     else:
         form = AuthenticationForm()
-
     return render(request, 'otlop/login.html', {'form': form})
 # دالة إنشاء الحساب
 def register_view(request):
